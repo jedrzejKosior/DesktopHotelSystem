@@ -105,7 +105,7 @@ def query_clients():
     line_print = ''
     for i in our_data:
         line_print += str(i[0]) + " " + str(i[1]) + " " + str(i[2]) + " " + str(i[3]) + " " + str(i[4]) + " " + str(
-            i[5]) + " " + str(i[6]) + "\tid: " + str(i[7]) + "\n"
+            i[5]) + " room: " + str(i[6]) + "\tid: " + str(i[7]) + "\n"
 
     query_label = Label(root, text=line_print)
     query_label.grid(row=15, column=0, columnspan=2)
@@ -131,7 +131,7 @@ def query_rooms():
     # loop our information
     line_print = ''
     for i in our_data:
-        line_print += "Pokój: " + str(i[0]) + " " + str(i[1]) + " " + str(i[2]) + " " + str(i[3]) + " " + str(
+        line_print += "Room: " + str(i[0]) + " " + str(i[1]) + " " + str(i[2]) + " " + str(i[3]) + " " + str(
             i[4]) + "\tid: " + str(
             i[5]) + "\n"
 
@@ -164,6 +164,69 @@ def delete():
     conn.close()
 
 
+# create edition save function for clients
+def save_edition():
+    # create database or connect to one
+    conn = sqlite3.connect('hotel.db')
+
+    # create cursors
+    cursor = conn.cursor()
+
+    record_id = client_or_room_id_for_edit.get()
+    print(record_id)
+
+    cursor.execute("""UPDATE clients SET
+                 first_name = :first_name_update,
+                 last_name = :last_name_update,
+                 address = :address_update,
+                 city = :city_update,
+                 state = :state_update,
+                 zipcode = :zipcode_update,
+                 room_number = :room_number_update   
+                 
+                 WHERE oid = :oid_for_update""",
+                   {
+                       'first_name_update': f_name_editor.get(),
+                       'last_name_update': l_name_editor.get(),
+                       'address_update': address_editor.get(),
+                       'city_update': city_editor.get(),
+                       'state_update': state_editor.get(),
+                       'zipcode_update': zipcode_editor.get(),
+                       'room_number_update': r_number_editor.get(),
+                       'oid_for_update': record_id,
+                   })
+
+    # commit changes
+    conn.commit()
+
+    # close connection
+    conn.close()
+
+
+# create edition save function for rooms
+def save_edition_for_rooms():
+    # create database or connect to one
+    conn = sqlite3.connect('hotel.db')
+
+    # create cursors
+    cursor = conn.cursor()
+
+    cursor.execute("""UPDATE clients SET
+                room_number integer,
+                status text,
+                book_start text,
+                book_end text,
+                payment_status text
+
+    """)
+
+    # commit changes
+    conn.commit()
+
+    # close connection
+    conn.close()
+
+
 # create edit function to change values of records
 def edit():
     editor = Tk()
@@ -176,6 +239,20 @@ def edit():
     # create cursors
     cursor = conn.cursor()
     cursor_for_rooms = conn.cursor()
+
+    # create global variables for our text boxes in editor to access them later in update methods
+    global f_name_editor
+    global l_name_editor
+    global address_editor
+    global city_editor
+    global state_editor
+    global zipcode_editor
+    global r_number_editor
+    global r_number_for_rooms_section_editor
+    global status_editor
+    global book_start_editor
+    global book_end_editor
+    global payment_status_editor
 
     # create text boxes for client
     f_name_editor = Entry(editor, width=30)
@@ -262,16 +339,14 @@ def edit():
     payment_status_label_editor.grid(row=14, column=0, padx=10)
 
     # create submit button fro clients
-    submit_button_editor = Button(editor, text="Save client changes", command=submit)
+    submit_button_editor = Button(editor, text="Save client changes", command=save_edition)
     submit_button_editor.grid(row=8, column=0, columnspan=2, pady=10, padx=10, ipadx=70)
 
     # create submit button for rooms
-    submit_button_editor = Button(editor, text="Save room changes", command=submit)
+    submit_button_editor = Button(editor, text="Save room changes", command=save_edition_for_rooms)
     submit_button_editor.grid(row=15, column=0, columnspan=2, pady=10, padx=10, ipadx=70)
 
     record_id = client_or_room_id_for_edit.get()
-    # delete from textbox
-    client_or_room_id_for_edit.delete(0, END)
 
     # Query the database
     cursor.execute("SELECT * FROM clients WHERE oid = " + record_id)
@@ -302,6 +377,7 @@ def edit():
 
     # close connection
     conn.close()
+
 
 # create text boxes for client
 f_name = Entry(root, width=30)
@@ -414,8 +490,8 @@ delete_button = Button(root, text="Delete client", command=delete)
 delete_button.grid(row=19, column=1, pady=10, padx=10, ipadx=58)
 
 # create edit button
-delete_button = Button(root, text="Edit", command=edit)
-delete_button.grid(row=21, column=1, pady=10, padx=10, ipadx=82)
+edit_button = Button(root, text="Edit", command=edit)
+edit_button.grid(row=21, column=1, pady=10, padx=10, ipadx=82)
 
 # commit changes
 conn.commit()

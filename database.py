@@ -5,7 +5,7 @@ root = Tk()
 root.title("Hotel Management System")
 # root.geometry("448x600")
 
-# create database
+# create database or open
 
 conn = sqlite3.connect('hotel.db')
 
@@ -31,7 +31,6 @@ cursor.execute("""CREATE TABLE rooms(
              book_end text,
              payment_status text
              )""")
-
 '''
 
 
@@ -173,7 +172,6 @@ def save_edition():
     cursor = conn.cursor()
 
     record_id = client_or_room_id_for_edit.get()
-    print(record_id)
 
     cursor.execute("""UPDATE clients SET
                  first_name = :first_name_update,
@@ -211,14 +209,23 @@ def save_edition_for_rooms():
     # create cursors
     cursor = conn.cursor()
 
-    cursor.execute("""UPDATE clients SET
-                room_number integer,
-                status text,
-                book_start text,
-                book_end text,
-                payment_status text
+    record_id = client_or_room_id_for_edit.get()
+    cursor.execute("""UPDATE rooms SET
+                 room_number = :room_number_update,
+                 status = :status_update,
+                 book_start = :book_start_update,
+                 book_end = :book_end_update,
+                 payment_status = :payment_status_update
 
-    """)
+                 WHERE oid = :oid_for_update""",
+                   {
+                       'room_number_update': r_number_for_rooms_section_editor.get(),
+                       'status_update': status_editor.get(),
+                       'book_start_update': book_start_editor.get(),
+                       'book_end_update': book_end_editor.get(),
+                       'payment_status_update': payment_status_editor.get(),
+                       'oid_for_update': record_id,
+                   })
 
     # commit changes
     conn.commit()

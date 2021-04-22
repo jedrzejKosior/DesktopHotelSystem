@@ -173,24 +173,9 @@ def edit():
     # create database or connect to one
     conn = sqlite3.connect('hotel.db')
 
-    # create cursor
+    # create cursors
     cursor = conn.cursor()
-
-    # record_id = client_or_room_id_for_edit.get()
-
-    # Query the database
-    # cursor.execute("SELECT * FROM clients WHERE oid = " + record_id)
-    # our_data = cursor.fetchall()
-
-    # for i in our_data:
-    #     f_name_editor.insert(0, i[0])
-
-    # loop our information
-    # line_print = ''
-    # for i in our_data:
-    #     line_print += "Pokój: " + str(i[0]) + " " + str(i[1]) + " " + str(i[2]) + " " + str(i[3]) + " " + str(
-    #         i[4]) + "\tid: " + str(
-    #         i[5]) + "\n"
+    cursor_for_rooms = conn.cursor()
 
     # create text boxes for client
     f_name_editor = Entry(editor, width=30)
@@ -211,21 +196,24 @@ def edit():
     zipcode_editor = Entry(editor, width=30)
     zipcode_editor.grid(row=6, column=1, padx=20)
 
-    # create text boxes for rooms
     r_number_editor = Entry(editor, width=30)
-    r_number_editor.grid(row=8, column=1, padx=20)
+    r_number_editor.grid(row=7, column=1, padx=20)
+
+    # create text boxes for rooms
+    r_number_for_rooms_section_editor = Entry(editor, width=30)
+    r_number_for_rooms_section_editor.grid(row=10, column=1, padx=20)
 
     status_editor = Entry(editor, width=30)
-    status_editor.grid(row=9, column=1, padx=20)
+    status_editor.grid(row=11, column=1, padx=20)
 
     book_start_editor = Entry(editor, width=30)
-    book_start_editor.grid(row=10, column=1, padx=20)
+    book_start_editor.grid(row=12, column=1, padx=20)
 
     book_end_editor = Entry(editor, width=30)
-    book_end_editor.grid(row=11, column=1, padx=20)
+    book_end_editor.grid(row=13, column=1, padx=20)
 
     payment_status_editor = Entry(editor, width=30)
-    payment_status_editor.grid(row=12, column=1, padx=20)
+    payment_status_editor.grid(row=14, column=1, padx=20)
 
     # create client section text
     room_section_editor = Label(editor, text="Client personal data")
@@ -233,47 +221,87 @@ def edit():
 
     # create text box labels for clients
     f_name_label_editor = Label(editor, text="First Name")
-    f_name_label_editor.grid(row=1, column=0)
+    f_name_label_editor.grid(row=1, column=0, padx=10)
 
     l_name_label_editor = Label(editor, text="Second Name")
-    l_name_label_editor.grid(row=2, column=0)
+    l_name_label_editor.grid(row=2, column=0, padx=10)
 
     address_label_editor = Label(editor, text="Address")
-    address_label_editor.grid(row=3, column=0)
+    address_label_editor.grid(row=3, column=0, padx=10)
 
     city_label_editor = Label(editor, text="City")
-    city_label_editor.grid(row=4, column=0)
+    city_label_editor.grid(row=4, column=0, padx=10)
 
     state_label_editor = Label(editor, text="State")
-    state_label_editor.grid(row=5, column=0)
+    state_label_editor.grid(row=5, column=0, padx=10)
 
     zipcode_label_editor = Label(editor, text="Zipcode")
-    zipcode_label_editor.grid(row=6, column=0)
+    zipcode_label_editor.grid(row=6, column=0, padx=10)
+
+    r_number_label_editor = Label(editor, text="Room number")
+    r_number_label_editor.grid(row=7, column=0, padx=10)
 
     # create room section text
     room_section_editor = Label(editor, text="Room information")
-    room_section_editor.grid(row=7, column=0, columnspan=2, pady=10, padx=10)
+    room_section_editor.grid(row=9, column=0, columnspan=2, pady=10, padx=10)
 
     # create text box labels for rooms
-    r_number_label_editor = Label(editor, text="Room number")
-    r_number_label_editor.grid(row=8, column=0)
+    r_number_for_rooms_label_editor = Label(editor, text="Room number")
+    r_number_for_rooms_label_editor.grid(row=10, column=0, padx=10)
 
     status_label_editor = Label(editor, text="Status")
-    status_label_editor.grid(row=9, column=0)
+    status_label_editor.grid(row=11, column=0, padx=10)
 
     book_start_label_editor = Label(editor, text="Book start date")
-    book_start_label_editor.grid(row=10, column=0)
+    book_start_label_editor.grid(row=12, column=0, padx=10)
 
     book_end_label_editor = Label(editor, text="Book end date")
-    book_end_label_editor.grid(row=11, column=0)
+    book_end_label_editor.grid(row=13, column=0, padx=10)
 
     payment_status_label_editor = Label(editor, text="Payment Status")
-    payment_status_label_editor.grid(row=12, column=0, pady=10, padx=10)
+    payment_status_label_editor.grid(row=14, column=0, padx=10)
 
-    # create submit button
-    submit_button_editor = Button(editor, text="Save", command=submit)
-    submit_button_editor.grid(row=13, column=0, columnspan=2, pady=10, padx=10, ipadx=100)
+    # create submit button fro clients
+    submit_button_editor = Button(editor, text="Save client changes", command=submit)
+    submit_button_editor.grid(row=8, column=0, columnspan=2, pady=10, padx=10, ipadx=70)
 
+    # create submit button for rooms
+    submit_button_editor = Button(editor, text="Save room changes", command=submit)
+    submit_button_editor.grid(row=15, column=0, columnspan=2, pady=10, padx=10, ipadx=70)
+
+    record_id = client_or_room_id_for_edit.get()
+    # delete from textbox
+    client_or_room_id_for_edit.delete(0, END)
+
+    # Query the database
+    cursor.execute("SELECT * FROM clients WHERE oid = " + record_id)
+    our_data = cursor.fetchall()
+
+    for i in our_data:
+        f_name_editor.insert(0, i[0]),
+        l_name_editor.insert(0, i[1]),
+        address_editor.insert(0, i[2]),
+        city_editor.insert(0, i[3]),
+        state_editor.insert(0, i[4]),
+        zipcode_editor.insert(0, i[5]),
+        r_number_editor.insert(0, i[6])
+
+    # query the database for room information
+    cursor_for_rooms.execute("SELECT * FROM rooms WHERE oid = " + record_id)
+    our_data_for_rooms = cursor_for_rooms.fetchall()
+
+    for i in our_data_for_rooms:
+        r_number_for_rooms_section_editor.insert(0, i[0]),
+        status_editor.insert(0, i[1]),
+        book_start_editor.insert(0, i[2]),
+        book_end_editor.insert(0, i[3]),
+        payment_status_editor.insert(0, i[4])
+
+    # commit changes
+    conn.commit()
+
+    # close connection
+    conn.close()
 
 # create text boxes for client
 f_name = Entry(root, width=30)

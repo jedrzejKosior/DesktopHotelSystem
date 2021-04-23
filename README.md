@@ -1,1 +1,1 @@
-Kinter needed to run this project
+Tkinter needed to run this project

@@ -13,7 +13,7 @@ conn = sqlite3.connect('hotel.db')
 cursor = conn.cursor()
 
 # create tables
-# Commented because we can use these executables only once
+'''# Commented because we can use these executables only once
 cursor.execute("""CREATE TABLE clients (
              first_name text,
              last_name text,
@@ -57,6 +57,7 @@ cursor.execute("INSERT INTO rooms VALUES (11, 'Clear', 'None', 'None', 'None')")
 cursor.execute("INSERT INTO rooms VALUES (12, 'Clear', 'None', 'None', 'None')")
 cursor.execute("INSERT INTO rooms VALUES (13, 'Clear', 'None', 'None', 'None')")
 cursor.execute("INSERT INTO rooms VALUES (14, 'Clear', 'None', 'None', 'None')")
+'''
 
 
 # create submit
@@ -120,25 +121,84 @@ def submit():
 
 
 # create query
+# def query_clients():
+#     # create database or connect to one
+#     conn = sqlite3.connect('hotel.db')
+#
+#     # create cursor
+#     cursor = conn.cursor()
+#
+#     # Query the database
+#     cursor.execute("SELECT *, oid FROM clients")
+#     our_data = cursor.fetchall()
+#
+#     # loop our information
+#     line_print = ''
+#     for i in our_data:
+#         line_print += str(i[0]) + " " + str(i[1]) + ", " + str(i[2]) + ", " + str(i[3]) + ", " + str(i[4]) + " " + str(
+#             i[5]) + ", room: " + str(i[6]) + " (id: " + str(i[7]) + ")\n"
+#
+#     query_label = Label(root, text=line_print)
+#     query_label.grid(row=15, column=0, columnspan=2)
+#
+#     # commit changes
+#     conn.commit()
+#
+#     # close connection
+#     conn.close()
+
 def query_clients():
+    clients_table_view = Tk()
+    clients_table_view.title("Room Information")
+    # editor.geometry("448x600")
+
     # create database or connect to one
     conn = sqlite3.connect('hotel.db')
 
-    # create cursor
+    # create cursors
     cursor = conn.cursor()
 
-    # Query the database
-    cursor.execute("SELECT *, oid FROM clients")
+    # query the database for room information
+    cursor.execute("SELECT oid, * FROM clients")
     our_data = cursor.fetchall()
 
-    # loop our information
-    line_print = ''
-    for i in our_data:
-        line_print += str(i[0]) + " " + str(i[1]) + ", " + str(i[2]) + ", " + str(i[3]) + ", " + str(i[4]) + " " + str(
-            i[5]) + ", room: " + str(i[6]) + " (id: " + str(i[7]) + ")\n"
+    # create clients section text
+    room_section = Label(clients_table_view, text="Client information")
+    room_section.grid(row=0, column=0, columnspan=8, pady=10, padx=10)
 
-    query_label = Label(root, text=line_print)
-    query_label.grid(row=15, column=0, columnspan=2)
+    # create table labels
+    r_number_for_rooms_label_query = Label(clients_table_view, text="Client ID")
+    r_number_for_rooms_label_query.grid(row=1, column=0, padx=10)
+
+    status_label_query = Label(clients_table_view, text="First name")
+    status_label_query.grid(row=1, column=1, padx=10)
+
+    book_start_label_query = Label(clients_table_view, text="Last name")
+    book_start_label_query.grid(row=1, column=2, padx=10)
+
+    book_end_label_query = Label(clients_table_view, text="Address")
+    book_end_label_query.grid(row=1, column=3, padx=10)
+
+    payment_status_label_query = Label(clients_table_view, text="City")
+    payment_status_label_query.grid(row=1, column=4, padx=10)
+
+    payment_status_label_query = Label(clients_table_view, text="State")
+    payment_status_label_query.grid(row=1, column=5, padx=10)
+
+    payment_status_label_query = Label(clients_table_view, text="Zipcode")
+    payment_status_label_query.grid(row=1, column=6, padx=10)
+
+    payment_status_label_query = Label(clients_table_view, text="Room number")
+    payment_status_label_query.grid(row=1, column=7, padx=10)
+
+    for i in range(len(our_data)):
+        for j in range(len(our_data[i])):
+            if (i != len(our_data) - 1):
+                loop_query = Label(clients_table_view, text=our_data[i][j])
+                loop_query.grid(row=2 + i, column=0 + j, padx=10)
+            else:
+                loop_query = Label(clients_table_view, text=our_data[i][j])
+                loop_query.grid(row=2 + i, column=0 + j, pady=(0, 10), padx=10)
 
     # commit changes
     conn.commit()
@@ -166,7 +226,7 @@ def query_rooms():
     room_section = Label(room_table_view, text="Room information")
     room_section.grid(row=0, column=0, columnspan=5, pady=10, padx=10)
 
-    # create text box labels for rooms
+    # create table labels
     r_number_for_rooms_label_query = Label(room_table_view, text="Room number")
     r_number_for_rooms_label_query.grid(row=1, column=0, padx=10)
 
@@ -182,8 +242,8 @@ def query_rooms():
     payment_status_label_query = Label(room_table_view, text="Payment Status")
     payment_status_label_query.grid(row=1, column=4, padx=10)
 
-    for i in range(14):
-        for j in range(5):
+    for i in range(len(our_data)):
+        for j in range(len(our_data[i])):
             if (i != 13):
                 loop_query = Label(room_table_view, text=our_data[i][j])
                 loop_query.grid(row=2 + i, column=0 + j, padx=10)

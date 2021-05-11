@@ -13,7 +13,7 @@ conn = sqlite3.connect('hotel.db')
 cursor = conn.cursor()
 
 # create tables
-'''# Commented because we can use these executables only once
+# Commented because we can use these executables only once
 cursor.execute("""CREATE TABLE clients (
              first_name text,
              last_name text,
@@ -31,7 +31,32 @@ cursor.execute("""CREATE TABLE rooms(
              book_end text,
              payment_status text
              )""")
-'''
+
+# NIE WIEM CZEMU TA PĘTLA NIE DZIAŁA
+# cursor.execute("""FOR iterable IN 1..14 LOOP
+#                 INSERT INTO rooms VALUES (iterable, :status, :book_start, :book_end, :payment_status)
+#                 END LOOP""",
+#                {
+#                    'status': 'Clear',
+#                    'book_start': 'None',
+#                    'book_end': 'None',
+#                    'payment_status': 'None'
+#                })
+
+cursor.execute("INSERT INTO rooms VALUES (1, 'Clear', 'None', 'None', 'None')")
+cursor.execute("INSERT INTO rooms VALUES (2, 'Clear', 'None', 'None', 'None')")
+cursor.execute("INSERT INTO rooms VALUES (3, 'Clear', 'None', 'None', 'None')")
+cursor.execute("INSERT INTO rooms VALUES (4, 'Clear', 'None', 'None', 'None')")
+cursor.execute("INSERT INTO rooms VALUES (5, 'Clear', 'None', 'None', 'None')")
+cursor.execute("INSERT INTO rooms VALUES (6, 'Clear', 'None', 'None', 'None')")
+cursor.execute("INSERT INTO rooms VALUES (7, 'Clear', 'None', 'None', 'None')")
+cursor.execute("INSERT INTO rooms VALUES (8, 'Clear', 'None', 'None', 'None')")
+cursor.execute("INSERT INTO rooms VALUES (9, 'Clear', 'None', 'None', 'None')")
+cursor.execute("INSERT INTO rooms VALUES (10, 'Clear', 'None', 'None', 'None')")
+cursor.execute("INSERT INTO rooms VALUES (11, 'Clear', 'None', 'None', 'None')")
+cursor.execute("INSERT INTO rooms VALUES (12, 'Clear', 'None', 'None', 'None')")
+cursor.execute("INSERT INTO rooms VALUES (13, 'Clear', 'None', 'None', 'None')")
+cursor.execute("INSERT INTO rooms VALUES (14, 'Clear', 'None', 'None', 'None')")
 
 
 # create submit
@@ -55,8 +80,14 @@ def submit():
                        'r_number': r_number.get()
                    })
 
-    # insert into room table
-    cursor.execute("INSERT INTO rooms VALUES (:r_number, :status, :book_start, :book_end, :payment_status)",
+    # Update into room table
+    cursor.execute("""UPDATE rooms SET 
+                    status = :status,
+                    book_start = :book_start,
+                    book_end = :book_end,
+                    payment_status = :payment_status
+                    WHERE
+                    room_number = :r_number""",
                    {
                        'r_number': r_number.get(),
                        'status': status.get(),
@@ -103,8 +134,8 @@ def query_clients():
     # loop our information
     line_print = ''
     for i in our_data:
-        line_print += str(i[0]) + " " + str(i[1]) + " " + str(i[2]) + " " + str(i[3]) + " " + str(i[4]) + " " + str(
-            i[5]) + " room: " + str(i[6]) + "\tid: " + str(i[7]) + "\n"
+        line_print += str(i[0]) + " " + str(i[1]) + ", " + str(i[2]) + ", " + str(i[3]) + ", " + str(i[4]) + " " + str(
+            i[5]) + ", room: " + str(i[6]) + " (id: " + str(i[7]) + ")\n"
 
     query_label = Label(root, text=line_print)
     query_label.grid(row=15, column=0, columnspan=2)
@@ -117,25 +148,48 @@ def query_clients():
 
 
 def query_rooms():
+    room_table_view = Tk()
+    room_table_view.title("Room Information")
+    # editor.geometry("448x600")
+
     # create database or connect to one
     conn = sqlite3.connect('hotel.db')
 
-    # create cursor
+    # create cursors
     cursor = conn.cursor()
 
-    # Query the database
-    cursor.execute("SELECT *, oid FROM rooms")
+    # query the database for room information
+    cursor.execute("SELECT * FROM rooms")
     our_data = cursor.fetchall()
 
-    # loop our information
-    line_print = ''
-    for i in our_data:
-        line_print += "Room: " + str(i[0]) + " " + str(i[1]) + " " + str(i[2]) + " " + str(i[3]) + " " + str(
-            i[4]) + "\tid: " + str(
-            i[5]) + "\n"
+    # create room section text
+    room_section = Label(room_table_view, text="Room information")
+    room_section.grid(row=0, column=0, columnspan=5, pady=10, padx=10)
 
-    query_label = Label(root, text=line_print)
-    query_label.grid(row=17, column=0, columnspan=2)
+    # create text box labels for rooms
+    r_number_for_rooms_label_query = Label(room_table_view, text="Room number")
+    r_number_for_rooms_label_query.grid(row=1, column=0, padx=10)
+
+    status_label_query = Label(room_table_view, text="Status")
+    status_label_query.grid(row=1, column=1, padx=10)
+
+    book_start_label_query = Label(room_table_view, text="Book start date")
+    book_start_label_query.grid(row=1, column=2, padx=10)
+
+    book_end_label_query = Label(room_table_view, text="Book end date")
+    book_end_label_query.grid(row=1, column=3, padx=10)
+
+    payment_status_label_query = Label(room_table_view, text="Payment Status")
+    payment_status_label_query.grid(row=1, column=4, padx=10)
+
+    for i in range(14):
+        for j in range(5):
+            if (i != 13):
+                loop_query = Label(room_table_view, text=our_data[i][j])
+                loop_query.grid(row=2 + i, column=0 + j, padx=10)
+            else:
+                loop_query = Label(room_table_view, text=our_data[i][j])
+                loop_query.grid(row=2 + i, column=0 + j, pady=(0, 10), padx=10)
 
     # commit changes
     conn.commit()

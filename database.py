@@ -121,32 +121,6 @@ def submit():
 
 
 # create query
-# def query_clients():
-#     # create database or connect to one
-#     conn = sqlite3.connect('hotel.db')
-#
-#     # create cursor
-#     cursor = conn.cursor()
-#
-#     # Query the database
-#     cursor.execute("SELECT *, oid FROM clients")
-#     our_data = cursor.fetchall()
-#
-#     # loop our information
-#     line_print = ''
-#     for i in our_data:
-#         line_print += str(i[0]) + " " + str(i[1]) + ", " + str(i[2]) + ", " + str(i[3]) + ", " + str(i[4]) + " " + str(
-#             i[5]) + ", room: " + str(i[6]) + " (id: " + str(i[7]) + ")\n"
-#
-#     query_label = Label(root, text=line_print)
-#     query_label.grid(row=15, column=0, columnspan=2)
-#
-#     # commit changes
-#     conn.commit()
-#
-#     # close connection
-#     conn.close()
-
 def query_clients():
     clients_table_view = Tk()
     clients_table_view.title("Room Information")

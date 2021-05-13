@@ -40,23 +40,23 @@ cursor.execute("""CREATE TABLE rooms(
 #                    'status': 'Clear',
 #                    'book_start': 'None',
 #                    'book_end': 'None',
-#                    'payment_status': 'None'
+#                    'payment_status': 'Not paid'
 #                })
 
-cursor.execute("INSERT INTO rooms VALUES (1, 'Clear', 'None', 'None', 'None')")
-cursor.execute("INSERT INTO rooms VALUES (2, 'Clear', 'None', 'None', 'None')")
-cursor.execute("INSERT INTO rooms VALUES (3, 'Clear', 'None', 'None', 'None')")
-cursor.execute("INSERT INTO rooms VALUES (4, 'Clear', 'None', 'None', 'None')")
-cursor.execute("INSERT INTO rooms VALUES (5, 'Clear', 'None', 'None', 'None')")
-cursor.execute("INSERT INTO rooms VALUES (6, 'Clear', 'None', 'None', 'None')")
-cursor.execute("INSERT INTO rooms VALUES (7, 'Clear', 'None', 'None', 'None')")
-cursor.execute("INSERT INTO rooms VALUES (8, 'Clear', 'None', 'None', 'None')")
-cursor.execute("INSERT INTO rooms VALUES (9, 'Clear', 'None', 'None', 'None')")
-cursor.execute("INSERT INTO rooms VALUES (10, 'Clear', 'None', 'None', 'None')")
-cursor.execute("INSERT INTO rooms VALUES (11, 'Clear', 'None', 'None', 'None')")
-cursor.execute("INSERT INTO rooms VALUES (12, 'Clear', 'None', 'None', 'None')")
-cursor.execute("INSERT INTO rooms VALUES (13, 'Clear', 'None', 'None', 'None')")
-cursor.execute("INSERT INTO rooms VALUES (14, 'Clear', 'None', 'None', 'None')")
+cursor.execute("INSERT INTO rooms VALUES (1, 'Clear', 'None', 'None', 'Not paid')")
+cursor.execute("INSERT INTO rooms VALUES (2, 'Clear', 'None', 'None', 'Not paid')")
+cursor.execute("INSERT INTO rooms VALUES (3, 'Clear', 'None', 'None', 'Not paid')")
+cursor.execute("INSERT INTO rooms VALUES (4, 'Clear', 'None', 'None', 'Not paid')")
+cursor.execute("INSERT INTO rooms VALUES (5, 'Clear', 'None', 'None', 'Not paid')")
+cursor.execute("INSERT INTO rooms VALUES (6, 'Clear', 'None', 'None', 'Not paid')")
+cursor.execute("INSERT INTO rooms VALUES (7, 'Clear', 'None', 'None', 'Not paid')")
+cursor.execute("INSERT INTO rooms VALUES (8, 'Clear', 'None', 'None', 'Not paid')")
+cursor.execute("INSERT INTO rooms VALUES (9, 'Clear', 'None', 'None', 'Not paid')")
+cursor.execute("INSERT INTO rooms VALUES (10, 'Clear', 'None', 'None', 'Not paid')")
+cursor.execute("INSERT INTO rooms VALUES (11, 'Clear', 'None', 'None', 'Not paid')")
+cursor.execute("INSERT INTO rooms VALUES (12, 'Clear', 'None', 'None', 'Not paid')")
+cursor.execute("INSERT INTO rooms VALUES (13, 'Clear', 'None', 'None', 'Not paid')")
+cursor.execute("INSERT INTO rooms VALUES (14, 'Clear', 'None', 'None', 'Not paid')")
 '''
 
 
@@ -78,7 +78,7 @@ def submit():
                        'city': city.get(),
                        'state': state.get(),
                        'zipcode': zipcode.get(),
-                       'r_number': r_number.get()
+                       'r_number': drop_down_variable_room_number.get()
                    })
 
     # Update into room table
@@ -90,11 +90,11 @@ def submit():
                     WHERE
                     room_number = :r_number""",
                    {
-                       'r_number': r_number.get(),
-                       'status': status.get(),
+                       'r_number': drop_down_variable_room_number.get(),
+                       'status': drop_down_variable_status.get(),
                        'book_start': book_start.get(),
                        'book_end': book_end.get(),
-                       'payment_status': payment_status.get()
+                       'payment_status': drop_down_variable_payment.get()
                    })
 
     # clear the text boxes for clients
@@ -107,11 +107,11 @@ def submit():
 
     # clear the text boxes for rooms
 
-    r_number.delete(0, END)
-    status.delete(0, END)
+    drop_down_variable_room_number.set(OPTIONS_FOR_ROOM_NUMBER[0])  # default option
+    drop_down_variable_status.set(OPTIONS_FOR_STATUS[0])  # default option
     book_start.delete(0, END)
     book_end.delete(0, END)
-    payment_status.delete(0, END)
+    drop_down_variable_payment.set(OPTIONS_FOR_PAYMENT[0])  # default option
 
     # commit changes
     conn.commit()
@@ -123,7 +123,7 @@ def submit():
 # create query
 def query_clients():
     clients_table_view = Tk()
-    clients_table_view.title("Room Information")
+    clients_table_view.title("Client Informations")
     # editor.geometry("448x600")
 
     # create database or connect to one
@@ -136,43 +136,39 @@ def query_clients():
     cursor.execute("SELECT oid, * FROM clients")
     our_data = cursor.fetchall()
 
-    # create clients section text
-    room_section = Label(clients_table_view, text="Client information")
-    room_section.grid(row=0, column=0, columnspan=8, pady=10, padx=10)
-
     # create table labels
     r_number_for_rooms_label_query = Label(clients_table_view, text="Client ID")
-    r_number_for_rooms_label_query.grid(row=1, column=0, padx=10)
+    r_number_for_rooms_label_query.grid(row=0, column=0, padx=10)
 
     status_label_query = Label(clients_table_view, text="First name")
-    status_label_query.grid(row=1, column=1, padx=10)
+    status_label_query.grid(row=0, column=1, padx=10)
 
     book_start_label_query = Label(clients_table_view, text="Last name")
-    book_start_label_query.grid(row=1, column=2, padx=10)
+    book_start_label_query.grid(row=0, column=2, padx=10)
 
     book_end_label_query = Label(clients_table_view, text="Address")
-    book_end_label_query.grid(row=1, column=3, padx=10)
+    book_end_label_query.grid(row=0, column=3, padx=10)
 
     payment_status_label_query = Label(clients_table_view, text="City")
-    payment_status_label_query.grid(row=1, column=4, padx=10)
+    payment_status_label_query.grid(row=0, column=4, padx=10)
 
     payment_status_label_query = Label(clients_table_view, text="State")
-    payment_status_label_query.grid(row=1, column=5, padx=10)
+    payment_status_label_query.grid(row=0, column=5, padx=10)
 
     payment_status_label_query = Label(clients_table_view, text="Zipcode")
-    payment_status_label_query.grid(row=1, column=6, padx=10)
+    payment_status_label_query.grid(row=0, column=6, padx=10)
 
     payment_status_label_query = Label(clients_table_view, text="Room number")
-    payment_status_label_query.grid(row=1, column=7, padx=10)
+    payment_status_label_query.grid(row=0, column=7, padx=10)
 
     for i in range(len(our_data)):
         for j in range(len(our_data[i])):
             if (i != len(our_data) - 1):
                 loop_query = Label(clients_table_view, text=our_data[i][j])
-                loop_query.grid(row=2 + i, column=0 + j, padx=10)
+                loop_query.grid(row=1 + i, column=0 + j, padx=10)
             else:
                 loop_query = Label(clients_table_view, text=our_data[i][j])
-                loop_query.grid(row=2 + i, column=0 + j, pady=(0, 10), padx=10)
+                loop_query.grid(row=1 + i, column=0 + j, pady=(0, 10), padx=10)
 
     # commit changes
     conn.commit()
@@ -183,7 +179,7 @@ def query_clients():
 
 def query_rooms():
     room_table_view = Tk()
-    room_table_view.title("Room Information")
+    room_table_view.title("Room Informations")
     # editor.geometry("448x600")
 
     # create database or connect to one
@@ -196,34 +192,30 @@ def query_rooms():
     cursor.execute("SELECT * FROM rooms")
     our_data = cursor.fetchall()
 
-    # create room section text
-    room_section = Label(room_table_view, text="Room information")
-    room_section.grid(row=0, column=0, columnspan=5, pady=10, padx=10)
-
     # create table labels
     r_number_for_rooms_label_query = Label(room_table_view, text="Room number")
-    r_number_for_rooms_label_query.grid(row=1, column=0, padx=10)
+    r_number_for_rooms_label_query.grid(row=0, column=0, padx=10)
 
     status_label_query = Label(room_table_view, text="Status")
-    status_label_query.grid(row=1, column=1, padx=10)
+    status_label_query.grid(row=0, column=1, padx=10)
 
     book_start_label_query = Label(room_table_view, text="Book start date")
-    book_start_label_query.grid(row=1, column=2, padx=10)
+    book_start_label_query.grid(row=0, column=2, padx=10)
 
     book_end_label_query = Label(room_table_view, text="Book end date")
-    book_end_label_query.grid(row=1, column=3, padx=10)
+    book_end_label_query.grid(row=0, column=3, padx=10)
 
     payment_status_label_query = Label(room_table_view, text="Payment Status")
-    payment_status_label_query.grid(row=1, column=4, padx=10)
+    payment_status_label_query.grid(row=0, column=4, padx=10)
 
     for i in range(len(our_data)):
         for j in range(len(our_data[i])):
             if (i != 13):
                 loop_query = Label(room_table_view, text=our_data[i][j])
-                loop_query.grid(row=2 + i, column=0 + j, padx=10)
+                loop_query.grid(row=1 + i, column=0 + j, padx=10)
             else:
                 loop_query = Label(room_table_view, text=our_data[i][j])
-                loop_query.grid(row=2 + i, column=0 + j, pady=(0, 10), padx=10)
+                loop_query.grid(row=1 + i, column=0 + j, pady=(0, 10), padx=10)
 
     # commit changes
     conn.commit()
@@ -299,7 +291,6 @@ def save_edition_for_rooms():
 
     record_id = client_or_room_id_for_edit.get()
     cursor.execute("""UPDATE rooms SET
-                 room_number = :room_number_update,
                  status = :status_update,
                  book_start = :book_start_update,
                  book_end = :book_end_update,
@@ -307,7 +298,6 @@ def save_edition_for_rooms():
 
                  WHERE oid = :oid_for_update""",
                    {
-                       'room_number_update': r_number_for_rooms_section_editor.get(),
                        'status_update': status_editor.get(),
                        'book_start_update': book_start_editor.get(),
                        'book_end_update': book_end_editor.get(),
@@ -334,6 +324,12 @@ def edit():
     # create cursors
     cursor = conn.cursor()
     cursor_for_rooms = conn.cursor()
+
+    record_id = client_or_room_id_for_edit.get()
+
+    cursor.execute("SELECT room_number FROM rooms WHERE oid= " + record_id)
+    what_room_do_we_edit = cursor.fetchall()
+    print(what_room_do_we_edit[0][0])
 
     # create global variables for our text boxes in editor to access them later in update methods
     global f_name_editor
@@ -372,23 +368,21 @@ def edit():
     r_number_editor.grid(row=7, column=1, padx=20)
 
     # create text boxes for rooms
-    r_number_for_rooms_section_editor = Entry(editor, width=30)
-    r_number_for_rooms_section_editor.grid(row=10, column=1, padx=20)
 
     status_editor = Entry(editor, width=30)
-    status_editor.grid(row=11, column=1, padx=20)
+    status_editor.grid(row=10, column=1, padx=20)
 
     book_start_editor = Entry(editor, width=30)
-    book_start_editor.grid(row=12, column=1, padx=20)
+    book_start_editor.grid(row=11, column=1, padx=20)
 
     book_end_editor = Entry(editor, width=30)
-    book_end_editor.grid(row=13, column=1, padx=20)
+    book_end_editor.grid(row=12, column=1, padx=20)
 
     payment_status_editor = Entry(editor, width=30)
-    payment_status_editor.grid(row=14, column=1, padx=20)
+    payment_status_editor.grid(row=13, column=1, padx=20)
 
     # create client section text
-    room_section_editor = Label(editor, text="Client personal data")
+    room_section_editor = Label(editor, text="Editor for client with ID: " + str(what_room_do_we_edit[0][0]))
     room_section_editor.grid(row=0, column=0, columnspan=2, pady=10, padx=10)
 
     # create text box labels for clients
@@ -414,7 +408,7 @@ def edit():
     r_number_label_editor.grid(row=7, column=0, padx=10)
 
     # create room section text
-    room_section_editor = Label(editor, text="Room information")
+    room_section_editor = Label(editor, text="Editor for room number: " + str(what_room_do_we_edit[0][0]))
     room_section_editor.grid(row=9, column=0, columnspan=2, pady=10, padx=10)
 
     # create text box labels for rooms
@@ -422,16 +416,16 @@ def edit():
     r_number_for_rooms_label_editor.grid(row=10, column=0, padx=10)
 
     status_label_editor = Label(editor, text="Status")
-    status_label_editor.grid(row=11, column=0, padx=10)
+    status_label_editor.grid(row=10, column=0, padx=10)
 
     book_start_label_editor = Label(editor, text="Book start date")
-    book_start_label_editor.grid(row=12, column=0, padx=10)
+    book_start_label_editor.grid(row=11, column=0, padx=10)
 
     book_end_label_editor = Label(editor, text="Book end date")
-    book_end_label_editor.grid(row=13, column=0, padx=10)
+    book_end_label_editor.grid(row=12, column=0, padx=10)
 
     payment_status_label_editor = Label(editor, text="Payment Status")
-    payment_status_label_editor.grid(row=14, column=0, padx=10)
+    payment_status_label_editor.grid(row=13, column=0, padx=10)
 
     # create submit button fro clients
     submit_button_editor = Button(editor, text="Save client changes", command=save_edition)
@@ -439,9 +433,7 @@ def edit():
 
     # create submit button for rooms
     submit_button_editor = Button(editor, text="Save room changes", command=save_edition_for_rooms)
-    submit_button_editor.grid(row=15, column=0, columnspan=2, pady=10, padx=10, ipadx=70)
-
-    record_id = client_or_room_id_for_edit.get()
+    submit_button_editor.grid(row=14, column=0, columnspan=2, pady=10, padx=10, ipadx=70)
 
     # Query the database
     cursor.execute("SELECT * FROM clients WHERE oid = " + record_id)
@@ -461,7 +453,7 @@ def edit():
     our_data_for_rooms = cursor_for_rooms.fetchall()
 
     for i in our_data_for_rooms:
-        r_number_for_rooms_section_editor.insert(0, i[0]),
+        # r_number_for_rooms_section_editor.insert(0, i[0]),
         status_editor.insert(0, i[1]),
         book_start_editor.insert(0, i[2]),
         book_end_editor.insert(0, i[3]),
@@ -493,11 +485,30 @@ state.grid(row=5, column=1, padx=20)
 zipcode = Entry(root, width=30)
 zipcode.grid(row=6, column=1, padx=20)
 
+# create drop down variables and ENUMS for rooms
+OPTIONS_FOR_STATUS = ["Clear", "Reserved", "Occupied"]
+OPTIONS_FOR_PAYMENT = ["Not paid", "Advance", "Fully paid"]
+OPTIONS_FOR_ROOM_NUMBER = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14"]
+
+drop_down_variable_status = StringVar(root)
+drop_down_variable_status.set(OPTIONS_FOR_STATUS[0])  # default option
+
+drop_down_variable_payment = StringVar(root)
+drop_down_variable_payment.set(OPTIONS_FOR_PAYMENT[0])  # default option
+
+drop_down_variable_room_number = StringVar(root)
+drop_down_variable_room_number.set(OPTIONS_FOR_ROOM_NUMBER[0])  # default option
+
+#POMYSL DO KALENDARZA jak nie wyjdzie z tkcalendar
+#stworzyć 3 drop downy, dzień, miesiąc, rok i dać im 3 kolumny, a tamtym pozostałym columnspanc
+
 # create text boxes for rooms
-r_number = Entry(root, width=30)
+r_number = OptionMenu(root, drop_down_variable_room_number, *OPTIONS_FOR_ROOM_NUMBER)
+r_number.config(width=24)
 r_number.grid(row=8, column=1, padx=20)
 
-status = Entry(root, width=30)
+status = OptionMenu(root, drop_down_variable_status, *OPTIONS_FOR_STATUS)
+status.config(width=24)
 status.grid(row=9, column=1, padx=20)
 
 book_start = Entry(root, width=30)
@@ -506,7 +517,8 @@ book_start.grid(row=10, column=1, padx=20)
 book_end = Entry(root, width=30)
 book_end.grid(row=11, column=1, padx=20)
 
-payment_status = Entry(root, width=30)
+payment_status = OptionMenu(root, drop_down_variable_payment, *OPTIONS_FOR_PAYMENT)
+payment_status.config(width=24)
 payment_status.grid(row=12, column=1, padx=20)
 
 # client id needed for delete

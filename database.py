@@ -243,77 +243,144 @@ def delete():
     conn.close()
 
 
-# create edition save function for clients
-def save_edition():
-    # create database or connect to one
-    conn = sqlite3.connect('hotel.db')
-
-    # create cursors
-    cursor = conn.cursor()
-
-    record_id = client_or_room_id_for_edit.get()
-
-    cursor.execute("""UPDATE clients SET
-                 first_name = :first_name_update,
-                 last_name = :last_name_update,
-                 address = :address_update,
-                 city = :city_update,
-                 state = :state_update,
-                 zipcode = :zipcode_update,
-                 room_number = :room_number_update   
-                 
-                 WHERE oid = :oid_for_update""",
-                   {
-                       'first_name_update': f_name_editor.get(),
-                       'last_name_update': l_name_editor.get(),
-                       'address_update': address_editor.get(),
-                       'city_update': city_editor.get(),
-                       'state_update': state_editor.get(),
-                       'zipcode_update': zipcode_editor.get(),
-                       'room_number_update': r_number_editor.get(),
-                       'oid_for_update': record_id,
-                   })
-
-    # commit changes
-    conn.commit()
-
-    # close connection
-    conn.close()
-
-
-# create edition save function for rooms
-def save_edition_for_rooms():
-    # create database or connect to one
-    conn = sqlite3.connect('hotel.db')
-
-    # create cursors
-    cursor = conn.cursor()
-
-    record_id = client_or_room_id_for_edit.get()
-    cursor.execute("""UPDATE rooms SET
-                 status = :status_update,
-                 book_start = :book_start_update,
-                 book_end = :book_end_update,
-                 payment_status = :payment_status_update
-
-                 WHERE oid = :oid_for_update""",
-                   {
-                       'status_update': status_editor.get(),
-                       'book_start_update': book_start_editor.get(),
-                       'book_end_update': book_end_editor.get(),
-                       'payment_status_update': payment_status_editor.get(),
-                       'oid_for_update': record_id,
-                   })
-
-    # commit changes
-    conn.commit()
-
-    # close connection
-    conn.close()
+# # create edition save function for clients
+# def save_edition():
+#     # create database or connect to one
+#     conn = sqlite3.connect('hotel.db')
+#
+#     # create cursors
+#     cursor = conn.cursor()
+#
+#     record_id = client_or_room_id_for_edit.get()
+#
+#     cursor.execute("""UPDATE clients SET
+#                  first_name = :first_name_update,
+#                  last_name = :last_name_update,
+#                  address = :address_update,
+#                  city = :city_update,
+#                  state = :state_update,
+#                  zipcode = :zipcode_update,
+#                  room_number = :room_number_update
+#
+#                  WHERE oid = :oid_for_update""",
+#                    {
+#                        'first_name_update': f_name_editor.get(),
+#                        'last_name_update': l_name_editor.get(),
+#                        'address_update': address_editor.get(),
+#                        'city_update': city_editor.get(),
+#                        'state_update': state_editor.get(),
+#                        'zipcode_update': zipcode_editor.get(),
+#                        'room_number_update': r_number_editor.get(),
+#                        'oid_for_update': record_id,
+#                    })
+#
+#     # commit changes
+#     conn.commit()
+#
+#     # close connection
+#     conn.close()
+#
+#
+# # create edition save function for rooms
+# def save_edition_for_rooms():
+#     # create database or connect to one
+#     conn = sqlite3.connect('hotel.db')
+#
+#     # create cursors
+#     cursor = conn.cursor()
+#
+#     record_id = client_or_room_id_for_edit.get()
+#     cursor.execute("""UPDATE rooms SET
+#                  status = :status_update,
+#                  book_start = :book_start_update,
+#                  book_end = :book_end_update,
+#                  payment_status = :payment_status_update
+#
+#                  WHERE oid = :oid_for_update""",
+#                    {
+#                        'status_update': drop_down_variable_status_editor.get(),
+#                        'book_start_update': book_start_editor.get(),
+#                        'book_end_update': book_end_editor.get(),
+#                        'payment_status_update': payment_status_editor.get(),
+#                        'oid_for_update': record_id,
+#                    })
+#
+#     # commit changes
+#     conn.commit()
+#
+#     # close connection
+#     conn.close()
 
 
 # create edit function to change values of records
 def edit():
+    # create edition save function for clients
+    def save_edition():
+        # create database or connect to one
+        conn = sqlite3.connect('hotel.db')
+
+        # create cursors
+        cursor = conn.cursor()
+
+        record_id = client_or_room_id_for_edit.get()
+
+        cursor.execute("""UPDATE clients SET
+                     first_name = :first_name_update,
+                     last_name = :last_name_update,
+                     address = :address_update,
+                     city = :city_update,
+                     state = :state_update,
+                     zipcode = :zipcode_update,
+                     room_number = :room_number_update   
+
+                     WHERE oid = :oid_for_update""",
+                       {
+                           'first_name_update': f_name_editor.get(),
+                           'last_name_update': l_name_editor.get(),
+                           'address_update': address_editor.get(),
+                           'city_update': city_editor.get(),
+                           'state_update': state_editor.get(),
+                           'zipcode_update': zipcode_editor.get(),
+                           'room_number_update': r_number_editor.get(),
+                           'oid_for_update': record_id,
+                       })
+
+        # commit changes
+        conn.commit()
+
+        # close connection
+        conn.close()
+
+    # create edition save function for rooms
+    def save_edition_for_rooms():
+        # create database or connect to one
+        conn = sqlite3.connect('hotel.db')
+
+        # create cursors
+        cursor = conn.cursor()
+
+        record_id = client_or_room_id_for_edit.get()
+        cursor.execute("""UPDATE rooms SET
+                     status = :status_update,
+                     book_start = :book_start_update,
+                     book_end = :book_end_update,
+                     payment_status = :payment_status_update
+
+                     WHERE oid = :oid_for_update""",
+                       {
+                           'status_update': drop_down_variable_status_editor.get(),
+                           'book_start_update': book_start_editor.get(),
+                           'book_end_update': book_end_editor.get(),
+                           'payment_status_update': drop_down_variable_payment_editor.get(),
+                           'oid_for_update': record_id,
+                       })
+
+        # commit changes
+        conn.commit()
+
+        # close connection
+        conn.close()
+
     editor = Tk()
     editor.title("Records Editor")
     # editor.geometry("448x600")
@@ -329,7 +396,6 @@ def edit():
 
     cursor.execute("SELECT room_number FROM rooms WHERE oid= " + record_id)
     what_room_do_we_edit = cursor.fetchall()
-    print(what_room_do_we_edit[0][0])
 
     # create global variables for our text boxes in editor to access them later in update methods
     global f_name_editor
@@ -367,9 +433,32 @@ def edit():
     r_number_editor = Entry(editor, width=30)
     r_number_editor.grid(row=7, column=1, padx=20)
 
-    # create text boxes for rooms
+    OPTIONS_FOR_STATUS_EDITOR = ["Clear", "Reserved", "Occupied"]
+    OPTIONS_FOR_PAYMENT_EDITOR = ["Not paid", "Advance", "Fully paid"]
 
-    status_editor = Entry(editor, width=30)
+    drop_down_variable_status_editor = StringVar(editor)
+    cursor.execute("SELECT status FROM rooms WHERE oid= " + record_id)
+    drop_down_set_status_starter = cursor.fetchall()
+    if(drop_down_set_status_starter[0][0]=="Not paid"):
+        drop_down_variable_status_editor.set(OPTIONS_FOR_STATUS_EDITOR[0])  # default option
+    elif(drop_down_set_status_starter[0][0]=="Advance"):
+        drop_down_variable_status_editor.set(OPTIONS_FOR_STATUS_EDITOR[1])
+    else:
+        drop_down_variable_status_editor.set(OPTIONS_FOR_STATUS_EDITOR[2])
+
+    drop_down_variable_payment_editor = StringVar(editor)
+    cursor.execute("SELECT payment_status FROM rooms WHERE oid= " + record_id)
+    drop_down_set_payment_starter = cursor.fetchall()
+    if(drop_down_set_payment_starter[0][0]=="Not paid"):
+        drop_down_variable_payment_editor.set(OPTIONS_FOR_PAYMENT_EDITOR[0])  # default option
+    elif(drop_down_set_payment_starter[0][0]=="Advance"):
+        drop_down_variable_payment_editor.set(OPTIONS_FOR_PAYMENT_EDITOR[1])
+    else:
+        drop_down_variable_payment_editor.set(OPTIONS_FOR_PAYMENT_EDITOR[2])
+
+    # create text boxes for rooms
+    status_editor = OptionMenu(editor, drop_down_variable_status_editor, *OPTIONS_FOR_STATUS_EDITOR)
+    status_editor.config(width=24)
     status_editor.grid(row=10, column=1, padx=20)
 
     book_start_editor = Entry(editor, width=30)
@@ -378,7 +467,8 @@ def edit():
     book_end_editor = Entry(editor, width=30)
     book_end_editor.grid(row=12, column=1, padx=20)
 
-    payment_status_editor = Entry(editor, width=30)
+    payment_status_editor = OptionMenu(editor, drop_down_variable_payment_editor, *OPTIONS_FOR_PAYMENT_EDITOR)
+    payment_status_editor.config(width=24)
     payment_status_editor.grid(row=13, column=1, padx=20)
 
     # create client section text
@@ -412,8 +502,6 @@ def edit():
     room_section_editor.grid(row=9, column=0, columnspan=2, pady=10, padx=10)
 
     # create text box labels for rooms
-    r_number_for_rooms_label_editor = Label(editor, text="Room number")
-    r_number_for_rooms_label_editor.grid(row=10, column=0, padx=10)
 
     status_label_editor = Label(editor, text="Status")
     status_label_editor.grid(row=10, column=0, padx=10)
@@ -454,10 +542,8 @@ def edit():
 
     for i in our_data_for_rooms:
         # r_number_for_rooms_section_editor.insert(0, i[0]),
-        status_editor.insert(0, i[1]),
         book_start_editor.insert(0, i[2]),
         book_end_editor.insert(0, i[3]),
-        payment_status_editor.insert(0, i[4])
 
     # commit changes
     conn.commit()

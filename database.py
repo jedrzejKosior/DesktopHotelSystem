@@ -1,5 +1,7 @@
 from tkinter import *
+from tkcalendar import *
 import sqlite3
+from datetime import date
 
 root = Tk()
 root.title("Hotel Management System")
@@ -13,7 +15,7 @@ conn = sqlite3.connect('hotel.db')
 cursor = conn.cursor()
 
 # create tables
-'''# Commented because we can use these executables only once
+# Commented because we can use these executables only once
 cursor.execute("""CREATE TABLE clients (
              first_name text,
              last_name text,
@@ -57,7 +59,7 @@ cursor.execute("INSERT INTO rooms VALUES (11, 'Clear', 'None', 'None', 'Not paid
 cursor.execute("INSERT INTO rooms VALUES (12, 'Clear', 'None', 'None', 'Not paid')")
 cursor.execute("INSERT INTO rooms VALUES (13, 'Clear', 'None', 'None', 'Not paid')")
 cursor.execute("INSERT INTO rooms VALUES (14, 'Clear', 'None', 'None', 'Not paid')")
-'''
+
 
 
 # create submit
@@ -109,8 +111,8 @@ def submit():
 
     drop_down_variable_room_number.set(OPTIONS_FOR_ROOM_NUMBER[0])  # default option
     drop_down_variable_status.set(OPTIONS_FOR_STATUS[0])  # default option
-    book_start.delete(0, END)
-    book_end.delete(0, END)
+    book_start.set_date(date.today())
+    book_end.set_date(date.today())
     drop_down_variable_payment.set(OPTIONS_FOR_PAYMENT[0])  # default option
 
     # commit changes
@@ -243,75 +245,6 @@ def delete():
     conn.close()
 
 
-# # create edition save function for clients
-# def save_edition():
-#     # create database or connect to one
-#     conn = sqlite3.connect('hotel.db')
-#
-#     # create cursors
-#     cursor = conn.cursor()
-#
-#     record_id = client_or_room_id_for_edit.get()
-#
-#     cursor.execute("""UPDATE clients SET
-#                  first_name = :first_name_update,
-#                  last_name = :last_name_update,
-#                  address = :address_update,
-#                  city = :city_update,
-#                  state = :state_update,
-#                  zipcode = :zipcode_update,
-#                  room_number = :room_number_update
-#
-#                  WHERE oid = :oid_for_update""",
-#                    {
-#                        'first_name_update': f_name_editor.get(),
-#                        'last_name_update': l_name_editor.get(),
-#                        'address_update': address_editor.get(),
-#                        'city_update': city_editor.get(),
-#                        'state_update': state_editor.get(),
-#                        'zipcode_update': zipcode_editor.get(),
-#                        'room_number_update': r_number_editor.get(),
-#                        'oid_for_update': record_id,
-#                    })
-#
-#     # commit changes
-#     conn.commit()
-#
-#     # close connection
-#     conn.close()
-#
-#
-# # create edition save function for rooms
-# def save_edition_for_rooms():
-#     # create database or connect to one
-#     conn = sqlite3.connect('hotel.db')
-#
-#     # create cursors
-#     cursor = conn.cursor()
-#
-#     record_id = client_or_room_id_for_edit.get()
-#     cursor.execute("""UPDATE rooms SET
-#                  status = :status_update,
-#                  book_start = :book_start_update,
-#                  book_end = :book_end_update,
-#                  payment_status = :payment_status_update
-#
-#                  WHERE oid = :oid_for_update""",
-#                    {
-#                        'status_update': drop_down_variable_status_editor.get(),
-#                        'book_start_update': book_start_editor.get(),
-#                        'book_end_update': book_end_editor.get(),
-#                        'payment_status_update': payment_status_editor.get(),
-#                        'oid_for_update': record_id,
-#                    })
-#
-#     # commit changes
-#     conn.commit()
-#
-#     # close connection
-#     conn.close()
-
-
 # create edit function to change values of records
 def edit():
     # create edition save function for clients
@@ -433,15 +366,16 @@ def edit():
     r_number_editor = Entry(editor, width=30)
     r_number_editor.grid(row=7, column=1, padx=20)
 
+    #QUERY FOR DROPDOWNS START
     OPTIONS_FOR_STATUS_EDITOR = ["Clear", "Reserved", "Occupied"]
     OPTIONS_FOR_PAYMENT_EDITOR = ["Not paid", "Advance", "Fully paid"]
 
     drop_down_variable_status_editor = StringVar(editor)
     cursor.execute("SELECT status FROM rooms WHERE oid= " + record_id)
     drop_down_set_status_starter = cursor.fetchall()
-    if(drop_down_set_status_starter[0][0]=="Not paid"):
+    if (drop_down_set_status_starter[0][0] == "Not paid"):
         drop_down_variable_status_editor.set(OPTIONS_FOR_STATUS_EDITOR[0])  # default option
-    elif(drop_down_set_status_starter[0][0]=="Advance"):
+    elif (drop_down_set_status_starter[0][0] == "Advance"):
         drop_down_variable_status_editor.set(OPTIONS_FOR_STATUS_EDITOR[1])
     else:
         drop_down_variable_status_editor.set(OPTIONS_FOR_STATUS_EDITOR[2])
@@ -449,23 +383,33 @@ def edit():
     drop_down_variable_payment_editor = StringVar(editor)
     cursor.execute("SELECT payment_status FROM rooms WHERE oid= " + record_id)
     drop_down_set_payment_starter = cursor.fetchall()
-    if(drop_down_set_payment_starter[0][0]=="Not paid"):
+    if (drop_down_set_payment_starter[0][0] == "Not paid"):
         drop_down_variable_payment_editor.set(OPTIONS_FOR_PAYMENT_EDITOR[0])  # default option
-    elif(drop_down_set_payment_starter[0][0]=="Advance"):
+    elif (drop_down_set_payment_starter[0][0] == "Advance"):
         drop_down_variable_payment_editor.set(OPTIONS_FOR_PAYMENT_EDITOR[1])
     else:
         drop_down_variable_payment_editor.set(OPTIONS_FOR_PAYMENT_EDITOR[2])
+
+    # QUERY FOR DROPDOWNS END
 
     # create text boxes for rooms
     status_editor = OptionMenu(editor, drop_down_variable_status_editor, *OPTIONS_FOR_STATUS_EDITOR)
     status_editor.config(width=24)
     status_editor.grid(row=10, column=1, padx=20)
 
-    book_start_editor = Entry(editor, width=30)
+    book_start_editor = DateEntry(editor, date_pattern="dd/mm/yyyy", width=27, background='grey', foreground='white',
+                                  borderwidth=2)
     book_start_editor.grid(row=11, column=1, padx=20)
 
-    book_end_editor = Entry(editor, width=30)
+    book_end_editor = DateEntry(editor, date_pattern="dd/mm/yyyy", width=27, background='grey', foreground='white',
+                                borderwidth=2)
     book_end_editor.grid(row=12, column=1, padx=20)
+
+    # book_start_editor = Entry(editor, width=30)
+    # book_start_editor.grid(row=11, column=1, padx=20)
+    #
+    # book_end_editor = Entry(editor, width=30)
+    # book_end_editor.grid(row=12, column=1, padx=20)
 
     payment_status_editor = OptionMenu(editor, drop_down_variable_payment_editor, *OPTIONS_FOR_PAYMENT_EDITOR)
     payment_status_editor.config(width=24)
@@ -540,8 +484,12 @@ def edit():
     cursor_for_rooms.execute("SELECT * FROM rooms WHERE oid = " + record_id)
     our_data_for_rooms = cursor_for_rooms.fetchall()
 
+
+    book_start_editor.delete(0, END)
+    book_end_editor.delete(0, END)
     for i in our_data_for_rooms:
         # r_number_for_rooms_section_editor.insert(0, i[0]),
+
         book_start_editor.insert(0, i[2]),
         book_end_editor.insert(0, i[3]),
 
@@ -585,9 +533,6 @@ drop_down_variable_payment.set(OPTIONS_FOR_PAYMENT[0])  # default option
 drop_down_variable_room_number = StringVar(root)
 drop_down_variable_room_number.set(OPTIONS_FOR_ROOM_NUMBER[0])  # default option
 
-#POMYSL DO KALENDARZA jak nie wyjdzie z tkcalendar
-#stworzyć 3 drop downy, dzień, miesiąc, rok i dać im 3 kolumny, a tamtym pozostałym columnspanc
-
 # create text boxes for rooms
 r_number = OptionMenu(root, drop_down_variable_room_number, *OPTIONS_FOR_ROOM_NUMBER)
 r_number.config(width=24)
@@ -597,10 +542,10 @@ status = OptionMenu(root, drop_down_variable_status, *OPTIONS_FOR_STATUS)
 status.config(width=24)
 status.grid(row=9, column=1, padx=20)
 
-book_start = Entry(root, width=30)
+book_start = DateEntry(root, date_pattern="dd/mm/yyyy", width=27, background='grey', foreground='white', borderwidth=2)
 book_start.grid(row=10, column=1, padx=20)
 
-book_end = Entry(root, width=30)
+book_end = DateEntry(root, date_pattern="dd/mm/yyyy", width=27, background='grey', foreground='white', borderwidth=2)
 book_end.grid(row=11, column=1, padx=20)
 
 payment_status = OptionMenu(root, drop_down_variable_payment, *OPTIONS_FOR_PAYMENT)

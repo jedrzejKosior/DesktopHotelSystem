@@ -15,7 +15,7 @@ conn = sqlite3.connect('hotel.db')
 cursor = conn.cursor()
 
 # create tables
-# Commented because we can use these executables only once
+'''# Commented because we can use these executables only once
 cursor.execute("""CREATE TABLE clients (
              first_name text,
              last_name text,
@@ -59,7 +59,7 @@ cursor.execute("INSERT INTO rooms VALUES (11, 'Clear', 'None', 'None', 'Not paid
 cursor.execute("INSERT INTO rooms VALUES (12, 'Clear', 'None', 'None', 'Not paid')")
 cursor.execute("INSERT INTO rooms VALUES (13, 'Clear', 'None', 'None', 'Not paid')")
 cursor.execute("INSERT INTO rooms VALUES (14, 'Clear', 'None', 'None', 'Not paid')")
-
+'''
 
 
 # create submit

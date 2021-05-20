@@ -62,6 +62,50 @@ cursor.execute("INSERT INTO rooms VALUES (14, 'Clear', 'None', 'None', 'Not paid
 '''
 
 
+# validations of inputs
+def is_not_right_zipcode(input):
+    if len(input) == 0 or len(input)!=6:
+        return True
+    if input[2] != "-":
+        return True
+    for i in range(len(input)):
+        if i==2:
+            i=i+1
+        if input[i].isdigit():
+            continue
+        else:
+            return True
+    return False
+
+
+def is_not_right_name_city_state(input):
+    if len(input) == 0:
+        return True
+    if input[0].isupper() == False:
+        return True
+    for i in range(len(input)):
+        if input[i].isalpha():
+            continue
+        else:
+            return True
+    return False
+
+
+def is_not_right_date(input):
+    if len(input) == 0 or len(input)!=10:
+        return True
+    if input[2] != "/" or input[5] != "/":
+        return True
+    for i in range(len(input)):
+        if i==2 or i==5:
+            i=i+1
+        if input[i].isdigit():
+            continue
+        else:
+            return True
+    return False
+
+
 # create submit
 
 def submit():
@@ -71,49 +115,81 @@ def submit():
     # create cursor
     cursor = conn.cursor()
 
-    # Insert into client table
-    cursor.execute("INSERT INTO clients VALUES (:f_name, :l_name, :address, :city, :state, :zipcode, :r_number)",
-                   {
-                       'f_name': f_name.get(),
-                       'l_name': l_name.get(),
-                       'address': address.get(),
-                       'city': city.get(),
-                       'state': state.get(),
-                       'zipcode': zipcode.get(),
-                       'r_number': drop_down_variable_room_number.get()
-                   })
+    if (is_not_right_zipcode(zipcode.get()) or is_not_right_name_city_state(
+            f_name.get()) or is_not_right_name_city_state(l_name.get()) or is_not_right_name_city_state(
+        city.get()) or is_not_right_name_city_state(state.get()) or is_not_right_date(
+        book_start.get()) or is_not_right_date(book_end.get())):
+        error_massage = Tk()
+        error_massage.title("Error")
+        error_list = Label(error_massage, text="Invalid input in:", fg="red")
+        error_list.grid(row=0, column=0, padx=10, pady=10)
+        if is_not_right_name_city_state(f_name.get()):
+            error_fname = Label(error_massage, text="First name", fg="red")
+            error_fname.grid(row=1, column=0, padx=10, pady=(0, 10))
+        if is_not_right_name_city_state(l_name.get()):
+            error_lname = Label(error_massage, text="Last name", fg="red")
+            error_lname.grid(row=2, column=0, padx=10, pady=(0, 10))
+        if is_not_right_name_city_state(city.get()):
+            error_city = Label(error_massage, text="City", fg="red")
+            error_city.grid(row=3, column=0, padx=10, pady=(0, 10))
+        if is_not_right_name_city_state(state.get()):
+            error_state = Label(error_massage, text="State", fg="red")
+            error_state.grid(row=4, column=0, padx=10, pady=(0, 10))
+        if is_not_right_zipcode(zipcode.get()):
+            error_zipcode = Label(error_massage, text="Zipcode", fg="red")
+            error_zipcode.grid(row=5, column=0, padx=10, pady=(0, 10))
+        if is_not_right_date(book_start.get()):
+            error_book_start = Label(error_massage, text="Book start", fg="red")
+            error_book_start.grid(row=6, column=0, padx=10, pady=(0, 10))
+        if is_not_right_date(book_end.get()):
+            error_book_end = Label(error_massage, text="Book end", fg="red")
+            error_book_end.grid(row=7, column=0, padx=10, pady=(0, 10))
 
-    # Update into room table
-    cursor.execute("""UPDATE rooms SET 
-                    status = :status,
-                    book_start = :book_start,
-                    book_end = :book_end,
-                    payment_status = :payment_status
-                    WHERE
-                    room_number = :r_number""",
-                   {
-                       'r_number': drop_down_variable_room_number.get(),
-                       'status': drop_down_variable_status.get(),
-                       'book_start': book_start.get(),
-                       'book_end': book_end.get(),
-                       'payment_status': drop_down_variable_payment.get()
-                   })
+    else:
 
-    # clear the text boxes for clients
-    f_name.delete(0, END)
-    l_name.delete(0, END)
-    address.delete(0, END)
-    city.delete(0, END)
-    state.delete(0, END)
-    zipcode.delete(0, END)
+        # Insert into client table
+        cursor.execute("INSERT INTO clients VALUES (:f_name, :l_name, :address, :city, :state, :zipcode, :r_number)",
+                       {
+                           'f_name': f_name.get(),
+                           'l_name': l_name.get(),
+                           'address': address.get(),
+                           'city': city.get(),
+                           'state': state.get(),
+                           'zipcode': zipcode.get(),
+                           'r_number': drop_down_variable_room_number.get()
+                       })
 
-    # clear the text boxes for rooms
+        # Update into room table
+        cursor.execute("""UPDATE rooms SET 
+                        status = :status,
+                        book_start = :book_start,
+                        book_end = :book_end,
+                        payment_status = :payment_status
+                        WHERE
+                        room_number = :r_number""",
+                       {
+                           'r_number': drop_down_variable_room_number.get(),
+                           'status': drop_down_variable_status.get(),
+                           'book_start': book_start.get(),
+                           'book_end': book_end.get(),
+                           'payment_status': drop_down_variable_payment.get()
+                       })
 
-    drop_down_variable_room_number.set(OPTIONS_FOR_ROOM_NUMBER[0])  # default option
-    drop_down_variable_status.set(OPTIONS_FOR_STATUS[0])  # default option
-    book_start.set_date(date.today())
-    book_end.set_date(date.today())
-    drop_down_variable_payment.set(OPTIONS_FOR_PAYMENT[0])  # default option
+        # clear the text boxes for clients
+        f_name.delete(0, END)
+        l_name.delete(0, END)
+        address.delete(0, END)
+        city.delete(0, END)
+        state.delete(0, END)
+        zipcode.delete(0, END)
+
+        # clear the text boxes for rooms
+
+        drop_down_variable_room_number.set(OPTIONS_FOR_ROOM_NUMBER[0])  # default option
+        drop_down_variable_status.set(OPTIONS_FOR_STATUS[0])  # default option
+        book_start.set_date(date.today())
+        book_end.set_date(date.today())
+        drop_down_variable_payment.set(OPTIONS_FOR_PAYMENT[0])  # default option
 
     # commit changes
     conn.commit()
@@ -366,7 +442,7 @@ def edit():
     r_number_editor = Entry(editor, width=30)
     r_number_editor.grid(row=7, column=1, padx=20)
 
-    #QUERY FOR DROPDOWNS START
+    # QUERY FOR DROPDOWNS START
     OPTIONS_FOR_STATUS_EDITOR = ["Clear", "Reserved", "Occupied"]
     OPTIONS_FOR_PAYMENT_EDITOR = ["Not paid", "Advance", "Fully paid"]
 
@@ -483,7 +559,6 @@ def edit():
     # query the database for room information
     cursor_for_rooms.execute("SELECT * FROM rooms WHERE oid = " + record_id)
     our_data_for_rooms = cursor_for_rooms.fetchall()
-
 
     book_start_editor.delete(0, END)
     book_end_editor.delete(0, END)

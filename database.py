@@ -64,13 +64,13 @@ cursor.execute("INSERT INTO rooms VALUES (14, 'Clear', 'None', 'None', 'Not paid
 
 # validations of inputs
 def is_not_right_zipcode(input):
-    if len(input) == 0 or len(input)!=6:
+    if len(input) == 0 or len(input) != 6:
         return True
     if input[2] != "-":
         return True
     for i in range(len(input)):
-        if i==2:
-            i=i+1
+        if i == 2:
+            i = i + 1
         if input[i].isdigit():
             continue
         else:
@@ -92,13 +92,13 @@ def is_not_right_name_city_state(input):
 
 
 def is_not_right_date(input):
-    if len(input) == 0 or len(input)!=10:
+    if len(input) == 0 or len(input) != 10:
         return True
     if input[2] != "/" or input[5] != "/":
         return True
     for i in range(len(input)):
-        if i==2 or i==5:
-            i=i+1
+        if i == 2 or i == 5:
+            i = i + 1
         if input[i].isdigit():
             continue
         else:
@@ -333,26 +333,50 @@ def edit():
 
         record_id = client_or_room_id_for_edit.get()
 
-        cursor.execute("""UPDATE clients SET
-                     first_name = :first_name_update,
-                     last_name = :last_name_update,
-                     address = :address_update,
-                     city = :city_update,
-                     state = :state_update,
-                     zipcode = :zipcode_update,
-                     room_number = :room_number_update   
-
-                     WHERE oid = :oid_for_update""",
-                       {
-                           'first_name_update': f_name_editor.get(),
-                           'last_name_update': l_name_editor.get(),
-                           'address_update': address_editor.get(),
-                           'city_update': city_editor.get(),
-                           'state_update': state_editor.get(),
-                           'zipcode_update': zipcode_editor.get(),
-                           'room_number_update': r_number_editor.get(),
-                           'oid_for_update': record_id,
-                       })
+        if (is_not_right_zipcode(zipcode_editor.get()) or is_not_right_name_city_state(
+                f_name_editor.get()) or is_not_right_name_city_state(
+            l_name_editor.get()) or is_not_right_name_city_state(
+            city_editor.get()) or is_not_right_name_city_state(state_editor.get())):
+            error_edition_massage = Tk()
+            error_edition_massage.title("Error")
+            error_list = Label(error_edition_massage, text="Invalid edition input in:", fg="red")
+            error_list.grid(row=0, column=0, padx=10, pady=10)
+            if is_not_right_name_city_state(f_name_editor.get()):
+                error_fname = Label(error_edition_massage, text="First name", fg="red")
+                error_fname.grid(row=1, column=0, padx=10, pady=(0, 10))
+            if is_not_right_name_city_state(l_name_editor.get()):
+                error_lname = Label(error_edition_massage, text="Last name", fg="red")
+                error_lname.grid(row=2, column=0, padx=10, pady=(0, 10))
+            if is_not_right_name_city_state(city_editor.get()):
+                error_city = Label(error_edition_massage, text="City", fg="red")
+                error_city.grid(row=3, column=0, padx=10, pady=(0, 10))
+            if is_not_right_name_city_state(state_editor.get()):
+                error_state = Label(error_edition_massage, text="State", fg="red")
+                error_state.grid(row=4, column=0, padx=10, pady=(0, 10))
+            if is_not_right_zipcode(zipcode_editor.get()):
+                error_zipcode = Label(error_edition_massage, text="Zipcode", fg="red")
+                error_zipcode.grid(row=5, column=0, padx=10, pady=(0, 10))
+        else:
+            cursor.execute("""UPDATE clients SET
+                         first_name = :first_name_update,
+                         last_name = :last_name_update,
+                         address = :address_update,
+                         city = :city_update,
+                         state = :state_update,
+                         zipcode = :zipcode_update,
+                         room_number = :room_number_update   
+    
+                         WHERE oid = :oid_for_update""",
+                           {
+                               'first_name_update': f_name_editor.get(),
+                               'last_name_update': l_name_editor.get(),
+                               'address_update': address_editor.get(),
+                               'city_update': city_editor.get(),
+                               'state_update': state_editor.get(),
+                               'zipcode_update': zipcode_editor.get(),
+                               'room_number_update': drop_down_variable_room_number_editor.get(),
+                               'oid_for_update': record_id,
+                           })
 
         # commit changes
         conn.commit()
@@ -369,20 +393,34 @@ def edit():
         cursor = conn.cursor()
 
         record_id = client_or_room_id_for_edit.get()
-        cursor.execute("""UPDATE rooms SET
-                     status = :status_update,
-                     book_start = :book_start_update,
-                     book_end = :book_end_update,
-                     payment_status = :payment_status_update
 
-                     WHERE oid = :oid_for_update""",
-                       {
-                           'status_update': drop_down_variable_status_editor.get(),
-                           'book_start_update': book_start_editor.get(),
-                           'book_end_update': book_end_editor.get(),
-                           'payment_status_update': drop_down_variable_payment_editor.get(),
-                           'oid_for_update': record_id,
-                       })
+        if (is_not_right_date(book_start_editor.get()) or is_not_right_date(book_end_editor.get())):
+            error_edition_massage_for_rooms = Tk()
+            error_edition_massage_for_rooms.title("Error")
+            error_list = Label(error_edition_massage_for_rooms, text="Invalid edition input in:", fg="red")
+            error_list.grid(row=0, column=0, padx=10, pady=10)
+
+            if is_not_right_date(book_start_editor.get()):
+                error_book_start = Label(error_edition_massage_for_rooms, text="Book start", fg="red")
+                error_book_start.grid(row=1, column=0, padx=10, pady=(0, 10))
+            if is_not_right_date(book_end_editor.get()):
+                error_book_end = Label(error_edition_massage_for_rooms, text="Book end", fg="red")
+                error_book_end.grid(row=2, column=0, padx=10, pady=(0, 10))
+        else:
+            cursor.execute("""UPDATE rooms SET
+                         status = :status_update,
+                         book_start = :book_start_update,
+                         book_end = :book_end_update,
+                         payment_status = :payment_status_update
+    
+                         WHERE oid = :oid_for_update""",
+                           {
+                               'status_update': drop_down_variable_status_editor.get(),
+                               'book_start_update': book_start_editor.get(),
+                               'book_end_update': book_end_editor.get(),
+                               'payment_status_update': drop_down_variable_payment_editor.get(),
+                               'oid_for_update': record_id,
+                           })
 
         # commit changes
         conn.commit()
@@ -421,6 +459,15 @@ def edit():
     global payment_status_editor
 
     # create text boxes for client
+    OPTIONS_FOR_ROOM_NUMBER_EDITOR = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14"]
+
+    drop_down_variable_room_number_editor = StringVar(editor)
+    cursor.execute("SELECT room_number FROM rooms WHERE oid= " + record_id)
+    drop_down_set_room_number_starter = cursor.fetchall()
+    for i in range(14):
+        if (drop_down_set_room_number_starter[0][0] == i + 1):
+            drop_down_variable_room_number_editor.set(OPTIONS_FOR_ROOM_NUMBER_EDITOR[i])
+
     f_name_editor = Entry(editor, width=30)
     f_name_editor.grid(row=1, column=1, padx=20)
 
@@ -439,7 +486,8 @@ def edit():
     zipcode_editor = Entry(editor, width=30)
     zipcode_editor.grid(row=6, column=1, padx=20)
 
-    r_number_editor = Entry(editor, width=30)
+    r_number_editor = OptionMenu(editor, drop_down_variable_room_number_editor, *OPTIONS_FOR_ROOM_NUMBER_EDITOR)
+    r_number_editor.config(width=24)
     r_number_editor.grid(row=7, column=1, padx=20)
 
     # QUERY FOR DROPDOWNS START
@@ -480,12 +528,6 @@ def edit():
     book_end_editor = DateEntry(editor, date_pattern="dd/mm/yyyy", width=27, background='grey', foreground='white',
                                 borderwidth=2)
     book_end_editor.grid(row=12, column=1, padx=20)
-
-    # book_start_editor = Entry(editor, width=30)
-    # book_start_editor.grid(row=11, column=1, padx=20)
-    #
-    # book_end_editor = Entry(editor, width=30)
-    # book_end_editor.grid(row=12, column=1, padx=20)
 
     payment_status_editor = OptionMenu(editor, drop_down_variable_payment_editor, *OPTIONS_FOR_PAYMENT_EDITOR)
     payment_status_editor.config(width=24)
@@ -554,7 +596,6 @@ def edit():
         city_editor.insert(0, i[3]),
         state_editor.insert(0, i[4]),
         zipcode_editor.insert(0, i[5]),
-        r_number_editor.insert(0, i[6])
 
     # query the database for room information
     cursor_for_rooms.execute("SELECT * FROM rooms WHERE oid = " + record_id)

@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="cb277c8d-d673-4e90-a74b-ba99e2a44a6b" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/database.py" beforeDir="false" afterPath="$PROJECT_DIR$/database.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/hotel.db" beforeDir="false" afterPath="$PROJECT_DIR$/hotel.db" afterDir="false" />
     </list>
@@ -17,8 +16,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/database.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="219">
-              <caret line="74" selection-start-line="74" selection-end-line="74" />
+            <state relative-caret-position="359">
+              <caret line="348" column="72" lean-forward="true" selection-start-line="348" selection-start-column="72" selection-end-line="348" selection-end-column="72" />
               <folding>
                 <element signature="e#0#21#0" expanded="true" />
               </folding>
@@ -48,8 +47,8 @@
       <find>editor</find>
       <find>room_table_view</find>
       <find>oid</find>
-      <find>print</find>
       <find>book s</find>
+      <find>print</find>
     </findStrings>
     <replaceStrings>
       <replace>room_table_view</replace>
@@ -209,8 +208,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/database.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="219">
-          <caret line="74" selection-start-line="74" selection-end-line="74" />
+        <state relative-caret-position="359">
+          <caret line="348" column="72" lean-forward="true" selection-start-line="348" selection-start-column="72" selection-end-line="348" selection-end-column="72" />
           <folding>
             <element signature="e#0#21#0" expanded="true" />
           </folding>

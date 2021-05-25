@@ -106,6 +106,25 @@ def is_not_right_date(input):
     return False
 
 
+def is_already_taken(room_number, starting_date, ending_date):
+    conn = sqlite3.connect('hotel.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT book_start, book_end FROM rooms WHERE room_number =" + str(room_number))
+    status_checking = cursor.fetchall()
+
+    # commit changes
+    conn.commit()
+
+    # close connection
+    conn.close()
+
+    if ((starting_date >= status_checking[0][0] and starting_date <= status_checking[0][1]) or (
+            ending_date >= status_checking[0][0] and ending_date <= status_checking[0][1])):
+        return True
+    else:
+        return False
+
+
 # create submit
 
 def submit():
@@ -121,7 +140,7 @@ def submit():
         book_start.get()) or is_not_right_date(book_end.get())):
         error_massage = Tk()
         error_massage.title("Error")
-        error_list = Label(error_massage, text="Invalid input in:", fg="red")
+        error_list = Label(error_massage, text="Invalid input or database error:", fg="red")
         error_list.grid(row=0, column=0, padx=10, pady=10)
         if is_not_right_name_city_state(f_name.get()):
             error_fname = Label(error_massage, text="First name", fg="red")
@@ -144,6 +163,12 @@ def submit():
         if is_not_right_date(book_end.get()):
             error_book_end = Label(error_massage, text="Book end", fg="red")
             error_book_end.grid(row=7, column=0, padx=10, pady=(0, 10))
+        if book_start.get() > book_end.get():
+            error_book_end = Label(error_massage, text="Booking date ends before it starts", fg="red")
+            error_book_end.grid(row=8, column=0, padx=10, pady=(0, 10))
+        if is_already_taken(drop_down_variable_room_number.get(), book_start.get(), book_end.get()):
+            error_book_end = Label(error_massage, text="This room is already booked on this date", fg="red")
+            error_book_end.grid(row=9, column=0, padx=10, pady=(0, 10))
 
     else:
 
@@ -174,7 +199,6 @@ def submit():
                            'book_end': book_end.get(),
                            'payment_status': drop_down_variable_payment.get()
                        })
-
         # clear the text boxes for clients
         f_name.delete(0, END)
         l_name.delete(0, END)

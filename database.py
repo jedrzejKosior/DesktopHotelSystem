@@ -15,7 +15,7 @@ conn = sqlite3.connect('hotel.db')
 cursor = conn.cursor()
 
 # create tables
-'''# Commented because we can use these executables only once
+# Commented because we can use these executables only once
 cursor.execute("""CREATE TABLE clients (
              first_name text,
              last_name text,
@@ -26,40 +26,16 @@ cursor.execute("""CREATE TABLE clients (
              room_number integer   
              )""")
 
-cursor.execute("""CREATE TABLE rooms(
-             room_number integer,
-             status text,
-             book_start text,
-             book_end text,
-             payment_status text
-             )""")
+cursor.execute(
+    "CREATE TABLE rooms(room_number integer, status text, book_start text, book_end text, payment_status text)")
 
-# NIE WIEM CZEMU TA PĘTLA NIE DZIAŁA
-# cursor.execute("""FOR iterable IN 1..14 LOOP
-#                 INSERT INTO rooms VALUES (iterable, :status, :book_start, :book_end, :payment_status)
-#                 END LOOP""",
-#                {
-#                    'status': 'Clear',
-#                    'book_start': 'None',
-#                    'book_end': 'None',
-#                    'payment_status': 'Not paid'
-#                })
+for i in range(1, 15):
+    cursor.execute(
+        "CREATE TABLE room"+str(i)+"(room_number integer, status text, book_start text, book_end text, payment_status text)")
+    cursor.execute("INSERT INTO room"+str(i)+" VALUES (" + str(i) + ", 'Clear', 'None', 'None', 'Not paid')")
 
-cursor.execute("INSERT INTO rooms VALUES (1, 'Clear', 'None', 'None', 'Not paid')")
-cursor.execute("INSERT INTO rooms VALUES (2, 'Clear', 'None', 'None', 'Not paid')")
-cursor.execute("INSERT INTO rooms VALUES (3, 'Clear', 'None', 'None', 'Not paid')")
-cursor.execute("INSERT INTO rooms VALUES (4, 'Clear', 'None', 'None', 'Not paid')")
-cursor.execute("INSERT INTO rooms VALUES (5, 'Clear', 'None', 'None', 'Not paid')")
-cursor.execute("INSERT INTO rooms VALUES (6, 'Clear', 'None', 'None', 'Not paid')")
-cursor.execute("INSERT INTO rooms VALUES (7, 'Clear', 'None', 'None', 'Not paid')")
-cursor.execute("INSERT INTO rooms VALUES (8, 'Clear', 'None', 'None', 'Not paid')")
-cursor.execute("INSERT INTO rooms VALUES (9, 'Clear', 'None', 'None', 'Not paid')")
-cursor.execute("INSERT INTO rooms VALUES (10, 'Clear', 'None', 'None', 'Not paid')")
-cursor.execute("INSERT INTO rooms VALUES (11, 'Clear', 'None', 'None', 'Not paid')")
-cursor.execute("INSERT INTO rooms VALUES (12, 'Clear', 'None', 'None', 'Not paid')")
-cursor.execute("INSERT INTO rooms VALUES (13, 'Clear', 'None', 'None', 'Not paid')")
-cursor.execute("INSERT INTO rooms VALUES (14, 'Clear', 'None', 'None', 'Not paid')")
-'''
+for i in range(1, 15):
+    cursor.execute("INSERT INTO rooms VALUES (" + str(i) + ", 'Clear', 'None', 'None', 'Not paid')")
 
 
 # validations of inputs
@@ -334,8 +310,25 @@ def delete():
     # create cursor
     cursor = conn.cursor()
 
+    cursor.execute("SELECT room_number FROM clients WHERE oid= " + client_id_for_delete.get())
+    our_room_to_delete = cursor.fetchall()
+    print(our_room_to_delete[0][0])
     # delete a record
     cursor.execute("DELETE FROM clients WHERE oid= " + client_id_for_delete.get())
+    cursor.execute("""UPDATE rooms SET
+                             status = :status_update,
+                             book_start = :book_start_update,
+                             book_end = :book_end_update,
+                             payment_status = :payment_status_update
+
+                             WHERE room_number = :room_for_update""",
+                   {
+                       'status_update': "Clear",
+                       'book_start_update': "None",
+                       'book_end_update': "None",
+                       'payment_status_update': "Not paid",
+                       'room_for_update': our_room_to_delete[0][0]
+                   })
 
     client_id_for_delete.delete(0, END)
     # commit changes
@@ -345,7 +338,7 @@ def delete():
     conn.close()
 
 
-# create edit function to change values of records
+# create edit function to change values of recordsś
 def edit():
     # create edition save function for clients
     def save_edition():

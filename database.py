@@ -32,6 +32,7 @@ for i in range(1, 15):
             i) + "(room_number integer, status text, book_start text, book_end text, payment_status text, client_id integer)")
     cursor.execute(
         "INSERT INTO room" + str(i) + " VALUES (" + str(i) + ", 'Clear', 'None', 'None', 'Not paid', 'None')")
+
 '''
 
 
@@ -95,12 +96,14 @@ def is_already_taken_for_update(room_number, starting_date, ending_date, client)
     while (i < len(status_checking)):
         if ((starting_date >= status_checking[i][0] and starting_date < status_checking[i][1]) or (
                 ending_date > status_checking[i][0] and ending_date <= status_checking[i][1])):
-            if(client==status_checking[i][2]):
+            if (int(client) == int(status_checking[i][2])):
+                i = i + 1
                 continue
             else:
                 return True
         i = i + 1
     return False
+
 
 def is_already_taken(room_number, starting_date, ending_date):
     conn = sqlite3.connect('hotel.db')
@@ -406,8 +409,32 @@ def delete():
 
 
 # create edit function to change values of recordsś
-# JEŚLI SIĘ ZMIENIŁ POKÓJ TO DAJEMY DELETE TEN RZAD W TABELI I INSERT DO NOWEJ UWZGLĘDNIAJĄC SPRAWDZENIE CZY NIE BĘDZIE TO PRZYPADKIEM PIERWSZY WPIS I PRZEKOPIOWANIE WARTOŚCI Z POKOJU POPRZEDNIEGO
 def edit():
+    def client_not_exist(input):
+        # create database or connect to one
+        conn = sqlite3.connect('hotel.db')
+
+        # create cursors
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT oid FROM clients")
+        our_clients = cursor.fetchall()
+        for i in range(len(our_clients)):
+            if (str(our_clients[i][0]) == str(input)):
+                # commit changes
+                conn.commit()
+
+                # close connection
+                conn.close()
+                return False
+
+        # commit changes
+        conn.commit()
+
+        # close connection
+        conn.close()
+        return True
+
     # create edition save function for clients
     def save_edition():
         # create database or connect to one
@@ -417,6 +444,10 @@ def edit():
         cursor = conn.cursor()
 
         record_id = client_or_room_id_for_edit.get()
+
+        cursor.execute("SELECT room_number FROM clients WHERE oid=" + record_id)
+        our_prevoius_room = cursor.fetchall()
+        our_prevoius_room = our_prevoius_room[0][0]
 
         if (is_not_right_zipcode(zipcode_editor.get()) or is_not_right_name_city_state(
                 f_name_editor.get()) or is_not_right_name_city_state(
@@ -477,8 +508,10 @@ def edit():
 
         record_id = client_or_room_id_for_edit.get()
 
-        if (is_not_right_date(book_start_editor.get()) or is_not_right_date(book_end_editor.get()) or is_already_taken_for_update(
-                drop_down_variable_room_number_editor.get(), book_start_editor.get(), book_end_editor.get(), record_id)):
+        if (is_not_right_date(book_start_editor.get()) or is_not_right_date(
+                book_end_editor.get()) or is_already_taken_for_update(
+            drop_down_variable_room_number_editor.get(), book_start_editor.get(), book_end_editor.get(),
+            record_id)):
             error_edition_massage_for_rooms = Tk()
             error_edition_massage_for_rooms.title("Error")
             error_list = Label(error_edition_massage_for_rooms, text="Invalid edition input in:", fg="red")
@@ -491,56 +524,77 @@ def edit():
                 error_book_end = Label(error_edition_massage_for_rooms, text="Book end", fg="red")
                 error_book_end.grid(row=2, column=0, padx=10, pady=(0, 10))
             if is_already_taken_for_update(drop_down_variable_room_number_editor.get(), book_start_editor.get(),
-                                book_end_editor.get(), record_id):
+                                           book_end_editor.get(), record_id):
                 error_book_end = Label(error_edition_massage_for_rooms, text="This room is already booked on this date",
                                        fg="red")
                 error_book_end.grid(row=3, column=0, padx=10, pady=(0, 10))
         else:
-            cursor.execute("""UPDATE room"""+str(drop_down_variable_room_number_editor.get())+""" SET
-                         status = :status_update,
-                         book_start = :book_start_update,
-                         book_end = :book_end_update,
-                         payment_status = :payment_status_update
-    
-                         WHERE client_id = :oid_for_update""",
-                           {
-                               'status_update': drop_down_variable_status_editor.get(),
-                               'book_start_update': book_start_editor.get(),
-                               'book_end_update': book_end_editor.get(),
-                               'payment_status_update': drop_down_variable_payment_editor.get(),
-                               'oid_for_update': record_id,
-                           })
+            if (int(our_prevoius_room) == int(drop_down_variable_room_number_editor.get())):
+                cursor.execute("""UPDATE room""" + str(drop_down_variable_room_number_editor.get()) + """ SET
+                             status = :status_update,
+                             book_start = :book_start_update,
+                             book_end = :book_end_update,
+                             payment_status = :payment_status_update
+        
+                             WHERE client_id = :oid_for_update""",
+                               {
+                                   'status_update': drop_down_variable_status_editor.get(),
+                                   'book_start_update': book_start_editor.get(),
+                                   'book_end_update': book_end_editor.get(),
+                                   'payment_status_update': drop_down_variable_payment_editor.get(),
+                                   'oid_for_update': record_id,
+                               })
+            else:
+                cursor.execute("SELECT oid FROM room" + str(drop_down_variable_room_number_editor.get()))
+                our_lenght = cursor.fetchall()
+                if (len(our_lenght) == 1):
+                    cursor.execute("""UPDATE room""" + str(drop_down_variable_room_number_editor.get()) + """ SET
+                                 status = :status_update,
+                                 book_start = :book_start_update,
+                                 book_end = :book_end_update,
+                                 payment_status = :payment_status_update,
+                                 client_id = :client_id_update
+
+                                 WHERE oid = 1""",
+                                   {
+                                       'status_update': drop_down_variable_status_editor.get(),
+                                       'book_start_update': book_start_editor.get(),
+                                       'book_end_update': book_end_editor.get(),
+                                       'payment_status_update': drop_down_variable_payment_editor.get(),
+                                       'client_id_update': record_id
+                                   })
+                else:
+                    cursor.execute("INSERT INTO room" + str(
+                        drop_down_variable_room_number_editor.get()) + " VALUES (:r_number, :status, :book_start, :book_end, :payment_status, :client_id)",
+                                   {
+                                       'r_number': drop_down_variable_room_number_editor.get(),
+                                       'status': drop_down_variable_status_editor.get(),
+                                       'book_start': book_start_editor.get(),
+                                       'book_end': book_end_editor.get(),
+                                       'payment_status': drop_down_variable_payment_editor.get(),
+                                       'client_id': record_id
+                                   })
+
+                cursor.execute("DELETE FROM room" + str(our_prevoius_room) + " WHERE client_id= " + record_id)
+                cursor.execute("SELECT oid FROM room" + str(our_prevoius_room))
+                lenght_after_delete_from_previous_room = cursor.fetchall()
+                if(len(lenght_after_delete_from_previous_room)==0):
+                    cursor.execute("INSERT INTO room" + str(
+                        our_prevoius_room) + " VALUES (:r_number, :status, :book_start, :book_end, :payment_status, :client_id)",
+                                   {
+                                       'r_number': int(our_prevoius_room),
+                                       'status': "Clear",
+                                       'book_start': "None",
+                                       'book_end': "None",
+                                       'payment_status': "Not paid",
+                                       'client_id': "None"
+                                   })
 
         # commit changes
         conn.commit()
 
         # close connection
         conn.close()
-
-    def client_not_exist(input):
-        # create database or connect to one
-        conn = sqlite3.connect('hotel.db')
-
-        # create cursors
-        cursor = conn.cursor()
-
-        cursor.execute("SELECT oid FROM clients")
-        our_clients = cursor.fetchall()
-        for i in range(len(our_clients)):
-            if (str(our_clients[i][0]) == str(input)):
-                # commit changes
-                conn.commit()
-
-                # close connection
-                conn.close()
-                return False
-
-        # commit changes
-        conn.commit()
-
-        # close connection
-        conn.close()
-        return True
 
     # create database or connect to one
     conn = sqlite3.connect('hotel.db')

@@ -16,8 +16,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/database.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="424">
-              <caret line="493" column="66" lean-forward="true" selection-start-line="493" selection-start-column="66" selection-end-line="493" selection-end-column="66" />
+            <state relative-caret-position="340">
+              <caret line="98" column="80" selection-start-line="98" selection-start-column="80" selection-end-line="98" selection-end-column="80" />
               <folding>
                 <element signature="e#0#21#0" expanded="true" />
               </folding>
@@ -36,7 +36,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>zipcode</find>
       <find>addresses</find>
       <find>client_id</find>
       <find>client_or_room_id_for_edit</find>
@@ -55,7 +54,6 @@
       <find>for</find>
       <find>room</find>
       <find>todo</find>
-      <find>delete</find>
       <find>what_room_do_we_edit</find>
       <find>drop_down_variable_room_number_editor</find>
       <find>UPDATE</find>
@@ -64,6 +62,10 @@
       <find>rooms</find>
       <find>query_room</find>
       <find>is_already_taken</find>
+      <find>delete</find>
+      <find>our_lenght</find>
+      <find>INSERT</find>
+      <find>is_already_taken_for_update</find>
     </findStrings>
     <replaceStrings>
       <replace>room_table_view</replace>
@@ -237,8 +239,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/database.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="424">
-          <caret line="493" column="66" lean-forward="true" selection-start-line="493" selection-start-column="66" selection-end-line="493" selection-end-column="66" />
+        <state relative-caret-position="340">
+          <caret line="98" column="80" selection-start-line="98" selection-start-column="80" selection-end-line="98" selection-end-column="80" />
           <folding>
             <element signature="e#0#21#0" expanded="true" />
           </folding>

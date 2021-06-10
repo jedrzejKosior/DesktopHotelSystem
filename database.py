@@ -15,7 +15,7 @@ conn = sqlite3.connect('hotel.db')
 cursor = conn.cursor()
 
 # create tables
-# Commented because we can use these executables only once
+'''# Commented because we can use these executables only once
 cursor.execute("""CREATE TABLE clients (
              first_name text,
              last_name text,
@@ -26,16 +26,13 @@ cursor.execute("""CREATE TABLE clients (
              room_number integer   
              )""")
 
-cursor.execute(
-    "CREATE TABLE rooms(room_number integer, status text, book_start text, book_end text, payment_status text)")
-
 for i in range(1, 15):
     cursor.execute(
-        "CREATE TABLE room"+str(i)+"(room_number integer, status text, book_start text, book_end text, payment_status text)")
-    cursor.execute("INSERT INTO room"+str(i)+" VALUES (" + str(i) + ", 'Clear', 'None', 'None', 'Not paid')")
-
-for i in range(1, 15):
-    cursor.execute("INSERT INTO rooms VALUES (" + str(i) + ", 'Clear', 'None', 'None', 'Not paid')")
+        "CREATE TABLE room" + str(
+            i) + "(room_number integer, status text, book_start text, book_end text, payment_status text, client_id integer)")
+    cursor.execute(
+        "INSERT INTO room" + str(i) + " VALUES (" + str(i) + ", 'Clear', 'None', 'None', 'Not paid', 'None')")
+'''
 
 
 # validations of inputs
@@ -82,10 +79,11 @@ def is_not_right_date(input):
     return False
 
 
+
 def is_already_taken(room_number, starting_date, ending_date):
     conn = sqlite3.connect('hotel.db')
     cursor = conn.cursor()
-    cursor.execute("SELECT book_start, book_end FROM rooms WHERE room_number =" + str(room_number))
+    cursor.execute("SELECT book_start, book_end FROM room" + str(room_number))
     status_checking = cursor.fetchall()
 
     # commit changes
@@ -93,12 +91,14 @@ def is_already_taken(room_number, starting_date, ending_date):
 
     # close connection
     conn.close()
-
-    if ((starting_date >= status_checking[0][0] and starting_date <= status_checking[0][1]) or (
-            ending_date >= status_checking[0][0] and ending_date <= status_checking[0][1])):
-        return True
-    else:
-        return False
+    i=0
+    # for i in range(len(status_checking)):
+    while(i<len(status_checking)):
+        if ((starting_date >= status_checking[i][0] and starting_date < status_checking[i][1]) or (
+                ending_date > status_checking[i][0] and ending_date <= status_checking[i][1])):
+            return True
+        i=i+1
+    return False
 
 
 # create submit
@@ -113,7 +113,7 @@ def submit():
     if (is_not_right_zipcode(zipcode.get()) or is_not_right_name_city_state(
             f_name.get()) or is_not_right_name_city_state(l_name.get()) or is_not_right_name_city_state(
         city.get()) or is_not_right_name_city_state(state.get()) or is_not_right_date(
-        book_start.get()) or is_not_right_date(book_end.get())):
+        book_start.get()) or is_not_right_date(book_end.get()) or is_already_taken(drop_down_variable_room_number.get(), book_start.get(), book_end.get())):
         error_massage = Tk()
         error_massage.title("Error")
         error_list = Label(error_massage, text="Invalid input or database error:", fg="red")
@@ -160,21 +160,55 @@ def submit():
                            'r_number': drop_down_variable_room_number.get()
                        })
 
-        # Update into room table
-        cursor.execute("""UPDATE rooms SET 
-                        status = :status,
-                        book_start = :book_start,
-                        book_end = :book_end,
-                        payment_status = :payment_status
-                        WHERE
-                        room_number = :r_number""",
-                       {
-                           'r_number': drop_down_variable_room_number.get(),
-                           'status': drop_down_variable_status.get(),
-                           'book_start': book_start.get(),
-                           'book_end': book_end.get(),
-                           'payment_status': drop_down_variable_payment.get()
-                       })
+        # commit changes
+        conn.commit()
+
+        # close connection
+        conn.close()
+
+        # create database or connect to one
+        conn = sqlite3.connect('hotel.db')
+
+        # create cursor
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT MAX(oid) FROM clients")
+        newest_client_id = cursor.fetchall()
+
+        cursor.execute("SELECT * FROM room" + str(drop_down_variable_room_number.get()))
+        our_data = cursor.fetchall()
+
+        if (our_data[0][2] == "None"):
+            # Update into room table
+            cursor.execute("""UPDATE room""" + str(drop_down_variable_room_number.get()) + """ SET
+                                     room_number = :r_number_update,
+                                     status = :status_update,
+                                     book_start = :book_start_update,
+                                     book_end = :book_end_update,
+                                     payment_status = :payment_status_update,
+                                     client_id = :client_id_update
+                                     WHERE oid = 1""",
+                           {
+                               'r_number_update': drop_down_variable_room_number.get(),
+                               'status_update': drop_down_variable_status.get(),
+                               'book_start_update': book_start.get(),
+                               'book_end_update': book_end.get(),
+                               'payment_status_update': drop_down_variable_payment.get(),
+                               'client_id_update': newest_client_id[0][0],
+
+                           })
+        else:
+            cursor.execute("INSERT INTO room" + str(
+                drop_down_variable_room_number.get()) + " VALUES (:r_number, :status, :book_start, :book_end, :payment_status, :client_id)",
+                           {
+                               'r_number': drop_down_variable_room_number.get(),
+                               'status': drop_down_variable_status.get(),
+                               'book_start': book_start.get(),
+                               'book_end': book_end.get(),
+                               'payment_status': drop_down_variable_payment.get(),
+                               'client_id': newest_client_id[0][0]
+                           })
+
         # clear the text boxes for clients
         f_name.delete(0, END)
         l_name.delete(0, END)
@@ -266,10 +300,6 @@ def query_rooms():
     # create cursors
     cursor = conn.cursor()
 
-    # query the database for room information
-    cursor.execute("SELECT * FROM rooms")
-    our_data = cursor.fetchall()
-
     # create table labels
     r_number_for_rooms_label_query = Label(room_table_view, text="Room number")
     r_number_for_rooms_label_query.grid(row=0, column=0, padx=10)
@@ -286,14 +316,22 @@ def query_rooms():
     payment_status_label_query = Label(room_table_view, text="Payment Status")
     payment_status_label_query.grid(row=0, column=4, padx=10)
 
-    for i in range(len(our_data)):
-        for j in range(len(our_data[i])):
-            if (i != 13):
-                loop_query = Label(room_table_view, text=our_data[i][j])
-                loop_query.grid(row=1 + i, column=0 + j, padx=10)
-            else:
-                loop_query = Label(room_table_view, text=our_data[i][j])
-                loop_query.grid(row=1 + i, column=0 + j, pady=(0, 10), padx=10)
+    last_used_row = 1
+    for table_room_number in range(1, 15):
+        # query the database for room information
+        cursor.execute(
+            "SELECT room_number, status, book_start, book_end, payment_status FROM room" + str(table_room_number))
+        our_data = cursor.fetchall()
+
+        for i in range(len(our_data)):
+            for j in range(len(our_data[i])):
+                if (i == len(our_data) - 1 and table_room_number == 14):
+                    loop_query = Label(room_table_view, text=our_data[i][j])
+                    loop_query.grid(row=last_used_row + i, column=0 + j, pady=(0, 10), padx=10)
+                else:
+                    loop_query = Label(room_table_view, text=our_data[i][j])
+                    loop_query.grid(row=last_used_row + i, column=0 + j, padx=10)
+            last_used_row = last_used_row + i + 1
 
     # commit changes
     conn.commit()
@@ -312,23 +350,29 @@ def delete():
 
     cursor.execute("SELECT room_number FROM clients WHERE oid= " + client_id_for_delete.get())
     our_room_to_delete = cursor.fetchall()
-    print(our_room_to_delete[0][0])
     # delete a record
     cursor.execute("DELETE FROM clients WHERE oid= " + client_id_for_delete.get())
-    cursor.execute("""UPDATE rooms SET
-                             status = :status_update,
-                             book_start = :book_start_update,
-                             book_end = :book_end_update,
-                             payment_status = :payment_status_update
+    cursor.execute(
+        "DELETE FROM room" + str(our_room_to_delete[0][0]) + " WHERE client_id= " + client_id_for_delete.get())
 
-                             WHERE room_number = :room_for_update""",
-                   {
-                       'status_update': "Clear",
-                       'book_start_update': "None",
-                       'book_end_update': "None",
-                       'payment_status_update': "Not paid",
-                       'room_for_update': our_room_to_delete[0][0]
-                   })
+    conn.commit()
+
+    # close connection
+    conn.close()
+
+    # create database or connect to one
+    conn = sqlite3.connect('hotel.db')
+
+    # create cursor
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM room" + str(our_room_to_delete[0][0]))
+    our_lenght = cursor.fetchall()
+
+    if (len(our_lenght) == 0):
+        cursor.execute(
+            "INSERT INTO room" + str(our_room_to_delete[0][0]) + " VALUES (" + str(
+                our_room_to_delete[0][0]) + ", 'Clear', 'None', 'None', 'Not paid', 'None')")
 
     client_id_for_delete.delete(0, END)
     # commit changes
@@ -445,10 +489,6 @@ def edit():
         # close connection
         conn.close()
 
-    editor = Tk()
-    editor.title("Records Editor")
-    # editor.geometry("448x600")
-
     # create database or connect to one
     conn = sqlite3.connect('hotel.db')
 
@@ -458,173 +498,188 @@ def edit():
 
     record_id = client_or_room_id_for_edit.get()
 
-    cursor.execute("SELECT room_number FROM rooms WHERE oid= " + record_id)
+    cursor.execute("SELECT room_number FROM clients WHERE oid= " + record_id)
     what_room_do_we_edit = cursor.fetchall()
 
-    # create global variables for our text boxes in editor to access them later in update methods
-    global f_name_editor
-    global l_name_editor
-    global address_editor
-    global city_editor
-    global state_editor
-    global zipcode_editor
-    global r_number_editor
-    global r_number_for_rooms_section_editor
-    global status_editor
-    global book_start_editor
-    global book_end_editor
-    global payment_status_editor
+    def client_not_exist(input):
+        cursor.execute("SELECT oid FROM clients")
+        our_clients=cursor.fetchall()
+        for i in range(len(our_clients)):
+            if(str(our_clients[i][0])==str(input)):
+                return False
+        return True
 
-    # create text boxes for client
-    OPTIONS_FOR_ROOM_NUMBER_EDITOR = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14"]
-
-    drop_down_variable_room_number_editor = StringVar(editor)
-    cursor.execute("SELECT room_number FROM rooms WHERE oid= " + record_id)
-    drop_down_set_room_number_starter = cursor.fetchall()
-    for i in range(14):
-        if (drop_down_set_room_number_starter[0][0] == i + 1):
-            drop_down_variable_room_number_editor.set(OPTIONS_FOR_ROOM_NUMBER_EDITOR[i])
-
-    f_name_editor = Entry(editor, width=30)
-    f_name_editor.grid(row=1, column=1, padx=20)
-
-    l_name_editor = Entry(editor, width=30)
-    l_name_editor.grid(row=2, column=1, padx=20)
-
-    address_editor = Entry(editor, width=30)
-    address_editor.grid(row=3, column=1, padx=20)
-
-    city_editor = Entry(editor, width=30)
-    city_editor.grid(row=4, column=1, padx=20)
-
-    state_editor = Entry(editor, width=30)
-    state_editor.grid(row=5, column=1, padx=20)
-
-    zipcode_editor = Entry(editor, width=30)
-    zipcode_editor.grid(row=6, column=1, padx=20)
-
-    r_number_editor = OptionMenu(editor, drop_down_variable_room_number_editor, *OPTIONS_FOR_ROOM_NUMBER_EDITOR)
-    r_number_editor.config(width=24)
-    r_number_editor.grid(row=7, column=1, padx=20)
-
-    # QUERY FOR DROPDOWNS START
-    OPTIONS_FOR_STATUS_EDITOR = ["Clear", "Reserved", "Occupied"]
-    OPTIONS_FOR_PAYMENT_EDITOR = ["Not paid", "Advance", "Fully paid"]
-
-    drop_down_variable_status_editor = StringVar(editor)
-    cursor.execute("SELECT status FROM rooms WHERE oid= " + record_id)
-    drop_down_set_status_starter = cursor.fetchall()
-    if (drop_down_set_status_starter[0][0] == "Not paid"):
-        drop_down_variable_status_editor.set(OPTIONS_FOR_STATUS_EDITOR[0])  # default option
-    elif (drop_down_set_status_starter[0][0] == "Advance"):
-        drop_down_variable_status_editor.set(OPTIONS_FOR_STATUS_EDITOR[1])
+    if (client_not_exist(record_id)):
+        error_edition_massage_for_edition_attempt = Tk()
+        error_edition_massage_for_edition_attempt.title("Error")
+        error_list = Label(error_edition_massage_for_edition_attempt, text="There is no such client!", fg="red")
+        error_list.grid(row=0, column=0, padx=10, pady=10)
     else:
-        drop_down_variable_status_editor.set(OPTIONS_FOR_STATUS_EDITOR[2])
+        editor = Tk()
+        editor.title("Records Editor")
+        # editor.geometry("448x600")
 
-    drop_down_variable_payment_editor = StringVar(editor)
-    cursor.execute("SELECT payment_status FROM rooms WHERE oid= " + record_id)
-    drop_down_set_payment_starter = cursor.fetchall()
-    if (drop_down_set_payment_starter[0][0] == "Not paid"):
-        drop_down_variable_payment_editor.set(OPTIONS_FOR_PAYMENT_EDITOR[0])  # default option
-    elif (drop_down_set_payment_starter[0][0] == "Advance"):
-        drop_down_variable_payment_editor.set(OPTIONS_FOR_PAYMENT_EDITOR[1])
-    else:
-        drop_down_variable_payment_editor.set(OPTIONS_FOR_PAYMENT_EDITOR[2])
+        # create global variables for our text boxes in editor to access them later in update methods
+        global f_name_editor
+        global l_name_editor
+        global address_editor
+        global city_editor
+        global state_editor
+        global zipcode_editor
+        global r_number_editor
+        global r_number_for_rooms_section_editor
+        global status_editor
+        global book_start_editor
+        global book_end_editor
+        global payment_status_editor
 
-    # QUERY FOR DROPDOWNS END
+        # create text boxes for client
+        OPTIONS_FOR_ROOM_NUMBER_EDITOR = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14"]
 
-    # create text boxes for rooms
-    status_editor = OptionMenu(editor, drop_down_variable_status_editor, *OPTIONS_FOR_STATUS_EDITOR)
-    status_editor.config(width=24)
-    status_editor.grid(row=10, column=1, padx=20)
+        drop_down_variable_room_number_editor = StringVar(editor)
+        for i in range(14):
+            if (what_room_do_we_edit[0][0] == i + 1):
+                drop_down_variable_room_number_editor.set(OPTIONS_FOR_ROOM_NUMBER_EDITOR[i])
 
-    book_start_editor = DateEntry(editor, date_pattern="dd/mm/yyyy", width=27, background='grey', foreground='white',
-                                  borderwidth=2)
-    book_start_editor.grid(row=11, column=1, padx=20)
+        f_name_editor = Entry(editor, width=30)
+        f_name_editor.grid(row=1, column=1, padx=20)
 
-    book_end_editor = DateEntry(editor, date_pattern="dd/mm/yyyy", width=27, background='grey', foreground='white',
-                                borderwidth=2)
-    book_end_editor.grid(row=12, column=1, padx=20)
+        l_name_editor = Entry(editor, width=30)
+        l_name_editor.grid(row=2, column=1, padx=20)
 
-    payment_status_editor = OptionMenu(editor, drop_down_variable_payment_editor, *OPTIONS_FOR_PAYMENT_EDITOR)
-    payment_status_editor.config(width=24)
-    payment_status_editor.grid(row=13, column=1, padx=20)
+        address_editor = Entry(editor, width=30)
+        address_editor.grid(row=3, column=1, padx=20)
 
-    # create client section text
-    room_section_editor = Label(editor, text="Editor for client with ID: " + str(what_room_do_we_edit[0][0]))
-    room_section_editor.grid(row=0, column=0, columnspan=2, pady=10, padx=10)
+        city_editor = Entry(editor, width=30)
+        city_editor.grid(row=4, column=1, padx=20)
 
-    # create text box labels for clients
-    f_name_label_editor = Label(editor, text="First Name")
-    f_name_label_editor.grid(row=1, column=0, padx=10)
+        state_editor = Entry(editor, width=30)
+        state_editor.grid(row=5, column=1, padx=20)
 
-    l_name_label_editor = Label(editor, text="Second Name")
-    l_name_label_editor.grid(row=2, column=0, padx=10)
+        zipcode_editor = Entry(editor, width=30)
+        zipcode_editor.grid(row=6, column=1, padx=20)
 
-    address_label_editor = Label(editor, text="Address")
-    address_label_editor.grid(row=3, column=0, padx=10)
+        r_number_editor = OptionMenu(editor, drop_down_variable_room_number_editor, *OPTIONS_FOR_ROOM_NUMBER_EDITOR)
+        r_number_editor.config(width=24)
+        r_number_editor.grid(row=7, column=1, padx=20)
 
-    city_label_editor = Label(editor, text="City")
-    city_label_editor.grid(row=4, column=0, padx=10)
+        # QUERY FOR DROPDOWNS START
+        OPTIONS_FOR_STATUS_EDITOR = ["Clear", "Reserved", "Occupied"]
+        OPTIONS_FOR_PAYMENT_EDITOR = ["Not paid", "Advance", "Fully paid"]
 
-    state_label_editor = Label(editor, text="State")
-    state_label_editor.grid(row=5, column=0, padx=10)
+        drop_down_variable_status_editor = StringVar(editor)
+        cursor.execute("SELECT status FROM room" + str(what_room_do_we_edit[0][0]) + " WHERE client_id= " + record_id)
+        drop_down_set_status_starter = cursor.fetchall()
+        if (drop_down_set_status_starter[0][0] == "Not paid"):
+            drop_down_variable_status_editor.set(OPTIONS_FOR_STATUS_EDITOR[0])  # default option
+        elif (drop_down_set_status_starter[0][0] == "Advance"):
+            drop_down_variable_status_editor.set(OPTIONS_FOR_STATUS_EDITOR[1])
+        else:
+            drop_down_variable_status_editor.set(OPTIONS_FOR_STATUS_EDITOR[2])
 
-    zipcode_label_editor = Label(editor, text="Zipcode")
-    zipcode_label_editor.grid(row=6, column=0, padx=10)
+        drop_down_variable_payment_editor = StringVar(editor)
+        cursor.execute(
+            "SELECT payment_status FROM room" + str(what_room_do_we_edit[0][0]) + " WHERE client_id= " + record_id)
+        drop_down_set_payment_starter = cursor.fetchall()
+        if (drop_down_set_payment_starter[0][0] == "Not paid"):
+            drop_down_variable_payment_editor.set(OPTIONS_FOR_PAYMENT_EDITOR[0])  # default option
+        elif (drop_down_set_payment_starter[0][0] == "Advance"):
+            drop_down_variable_payment_editor.set(OPTIONS_FOR_PAYMENT_EDITOR[1])
+        else:
+            drop_down_variable_payment_editor.set(OPTIONS_FOR_PAYMENT_EDITOR[2])
 
-    r_number_label_editor = Label(editor, text="Room number")
-    r_number_label_editor.grid(row=7, column=0, padx=10)
+        # QUERY FOR DROPDOWNS END
 
-    # create room section text
-    room_section_editor = Label(editor, text="Editor for room number: " + str(what_room_do_we_edit[0][0]))
-    room_section_editor.grid(row=9, column=0, columnspan=2, pady=10, padx=10)
+        # create text boxes for rooms
+        status_editor = OptionMenu(editor, drop_down_variable_status_editor, *OPTIONS_FOR_STATUS_EDITOR)
+        status_editor.config(width=24)
+        status_editor.grid(row=10, column=1, padx=20)
 
-    # create text box labels for rooms
+        book_start_editor = DateEntry(editor, date_pattern="dd/mm/yyyy", width=27, background='grey', foreground='white',
+                                      borderwidth=2)
+        book_start_editor.grid(row=11, column=1, padx=20)
 
-    status_label_editor = Label(editor, text="Status")
-    status_label_editor.grid(row=10, column=0, padx=10)
+        book_end_editor = DateEntry(editor, date_pattern="dd/mm/yyyy", width=27, background='grey', foreground='white',
+                                    borderwidth=2)
+        book_end_editor.grid(row=12, column=1, padx=20)
 
-    book_start_label_editor = Label(editor, text="Book start date")
-    book_start_label_editor.grid(row=11, column=0, padx=10)
+        payment_status_editor = OptionMenu(editor, drop_down_variable_payment_editor, *OPTIONS_FOR_PAYMENT_EDITOR)
+        payment_status_editor.config(width=24)
+        payment_status_editor.grid(row=13, column=1, padx=20)
 
-    book_end_label_editor = Label(editor, text="Book end date")
-    book_end_label_editor.grid(row=12, column=0, padx=10)
+        # create client section text
+        room_section_editor = Label(editor, text="Editor for client with ID: " + str(record_id))
+        room_section_editor.grid(row=0, column=0, columnspan=2, pady=10, padx=10)
 
-    payment_status_label_editor = Label(editor, text="Payment Status")
-    payment_status_label_editor.grid(row=13, column=0, padx=10)
+        # create text box labels for clients
+        f_name_label_editor = Label(editor, text="First Name")
+        f_name_label_editor.grid(row=1, column=0, padx=10)
 
-    # create submit button fro clients
-    submit_button_editor = Button(editor, text="Save client changes", command=save_edition)
-    submit_button_editor.grid(row=8, column=0, columnspan=2, pady=10, padx=10, ipadx=70)
+        l_name_label_editor = Label(editor, text="Second Name")
+        l_name_label_editor.grid(row=2, column=0, padx=10)
 
-    # create submit button for rooms
-    submit_button_editor = Button(editor, text="Save room changes", command=save_edition_for_rooms)
-    submit_button_editor.grid(row=14, column=0, columnspan=2, pady=10, padx=10, ipadx=70)
+        address_label_editor = Label(editor, text="Address")
+        address_label_editor.grid(row=3, column=0, padx=10)
 
-    # Query the database
-    cursor.execute("SELECT * FROM clients WHERE oid = " + record_id)
-    our_data = cursor.fetchall()
+        city_label_editor = Label(editor, text="City")
+        city_label_editor.grid(row=4, column=0, padx=10)
 
-    for i in our_data:
-        f_name_editor.insert(0, i[0]),
-        l_name_editor.insert(0, i[1]),
-        address_editor.insert(0, i[2]),
-        city_editor.insert(0, i[3]),
-        state_editor.insert(0, i[4]),
-        zipcode_editor.insert(0, i[5]),
+        state_label_editor = Label(editor, text="State")
+        state_label_editor.grid(row=5, column=0, padx=10)
 
-    # query the database for room information
-    cursor_for_rooms.execute("SELECT * FROM rooms WHERE oid = " + record_id)
-    our_data_for_rooms = cursor_for_rooms.fetchall()
+        zipcode_label_editor = Label(editor, text="Zipcode")
+        zipcode_label_editor.grid(row=6, column=0, padx=10)
 
-    book_start_editor.delete(0, END)
-    book_end_editor.delete(0, END)
-    for i in our_data_for_rooms:
-        # r_number_for_rooms_section_editor.insert(0, i[0]),
+        r_number_label_editor = Label(editor, text="Room number")
+        r_number_label_editor.grid(row=7, column=0, padx=10)
 
-        book_start_editor.insert(0, i[2]),
-        book_end_editor.insert(0, i[3]),
+        # create room section text
+        room_section_editor = Label(editor, text="Editor for room number: " + str(what_room_do_we_edit[0][0]))
+        room_section_editor.grid(row=9, column=0, columnspan=2, pady=10, padx=10)
+
+        # create text box labels for rooms
+
+        status_label_editor = Label(editor, text="Status")
+        status_label_editor.grid(row=10, column=0, padx=10)
+
+        book_start_label_editor = Label(editor, text="Book start date")
+        book_start_label_editor.grid(row=11, column=0, padx=10)
+
+        book_end_label_editor = Label(editor, text="Book end date")
+        book_end_label_editor.grid(row=12, column=0, padx=10)
+
+        payment_status_label_editor = Label(editor, text="Payment Status")
+        payment_status_label_editor.grid(row=13, column=0, padx=10)
+
+        # create submit button fro clients
+        submit_button_editor = Button(editor, text="Save client changes", command=save_edition)
+        submit_button_editor.grid(row=8, column=0, columnspan=2, pady=10, padx=10, ipadx=70)
+
+        # create submit button for rooms
+        submit_button_editor = Button(editor, text="Save room changes", command=save_edition_for_rooms)
+        submit_button_editor.grid(row=14, column=0, columnspan=2, pady=10, padx=10, ipadx=70)
+
+        # Query the database
+        cursor.execute("SELECT * FROM clients WHERE oid = " + record_id)
+        our_data = cursor.fetchall()
+
+        for i in our_data:
+            f_name_editor.insert(0, i[0]),
+            l_name_editor.insert(0, i[1]),
+            address_editor.insert(0, i[2]),
+            city_editor.insert(0, i[3]),
+            state_editor.insert(0, i[4]),
+            zipcode_editor.insert(0, i[5]),
+
+        # query the database for room information
+        cursor_for_rooms.execute("SELECT * FROM room" + str(what_room_do_we_edit[0][0]) + " WHERE client_id = " + record_id)
+        our_data_for_rooms = cursor_for_rooms.fetchall()
+
+        book_start_editor.delete(0, END)
+        book_end_editor.delete(0, END)
+        for i in our_data_for_rooms:
+            book_start_editor.insert(0, i[2]),
+            book_end_editor.insert(0, i[3]),
 
     # commit changes
     conn.commit()
@@ -741,7 +796,7 @@ room_section = Label(root, text="Delete client with id entered below ")
 room_section.grid(row=18, column=0, columnspan=2, pady=10, padx=10)
 
 # create edit section
-room_section = Label(root, text="Edit client or room with id entered below")
+room_section = Label(root, text="Edit reservation with client id entered below")
 room_section.grid(row=20, column=0, columnspan=2, pady=10, padx=10)
 
 # create submit button

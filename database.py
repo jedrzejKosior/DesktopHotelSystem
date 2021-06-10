@@ -32,9 +32,7 @@ for i in range(1, 15):
             i) + "(room_number integer, status text, book_start text, book_end text, payment_status text, client_id integer)")
     cursor.execute(
         "INSERT INTO room" + str(i) + " VALUES (" + str(i) + ", 'Clear', 'None', 'None', 'Not paid', 'None')")
-
 '''
-
 
 # validations of inputs
 def is_not_right_zipcode(input):
@@ -137,9 +135,10 @@ def submit():
 
     if (is_not_right_zipcode(zipcode.get()) or is_not_right_name_city_state(
             f_name.get()) or is_not_right_name_city_state(l_name.get()) or is_not_right_name_city_state(
-        city.get()) or is_not_right_name_city_state(state.get()) or is_not_right_date(
-        book_start.get()) or is_not_right_date(book_end.get()) or is_already_taken(drop_down_variable_room_number.get(),
-                                                                                   book_start.get(), book_end.get())):
+            city.get()) or is_not_right_name_city_state(state.get()) or is_not_right_date(
+            book_start.get()) or is_not_right_date(book_end.get()) or is_already_taken(
+            drop_down_variable_room_number.get(), book_start.get(), book_end.get()) or (
+    (book_start.get() >= book_end.get()))):
         error_massage = Tk()
         error_massage.title("Error")
         error_list = Label(error_massage, text="Invalid input or database error:", fg="red")
@@ -165,11 +164,11 @@ def submit():
         if is_not_right_date(book_end.get()):
             error_book_end = Label(error_massage, text="Book end", fg="red")
             error_book_end.grid(row=7, column=0, padx=10, pady=(0, 10))
-        if book_start.get() > book_end.get():
-            error_book_end = Label(error_massage, text="Booking date ends before it starts", fg="red")
-            error_book_end.grid(row=8, column=0, padx=10, pady=(0, 10))
         if is_already_taken(drop_down_variable_room_number.get(), book_start.get(), book_end.get()):
             error_book_end = Label(error_massage, text="This room is already booked on this date", fg="red")
+            error_book_end.grid(row=8, column=0, padx=10, pady=(0, 10))
+        if (book_start.get() >= book_end.get()):
+            error_book_end = Label(error_massage, text="End of stay is closer than start of it", fg="red")
             error_book_end.grid(row=9, column=0, padx=10, pady=(0, 10))
 
     else:
@@ -511,7 +510,7 @@ def edit():
         if (is_not_right_date(book_start_editor.get()) or is_not_right_date(
                 book_end_editor.get()) or is_already_taken_for_update(
             drop_down_variable_room_number_editor.get(), book_start_editor.get(), book_end_editor.get(),
-            record_id)):
+            record_id) or ((book_start_editor.get() >= book_end_editor.get()))):
             error_edition_massage_for_rooms = Tk()
             error_edition_massage_for_rooms.title("Error")
             error_list = Label(error_edition_massage_for_rooms, text="Invalid edition input in:", fg="red")
@@ -523,11 +522,13 @@ def edit():
             if is_not_right_date(book_end_editor.get()):
                 error_book_end = Label(error_edition_massage_for_rooms, text="Book end", fg="red")
                 error_book_end.grid(row=2, column=0, padx=10, pady=(0, 10))
-            if is_already_taken_for_update(drop_down_variable_room_number_editor.get(), book_start_editor.get(),
-                                           book_end_editor.get(), record_id):
-                error_book_end = Label(error_edition_massage_for_rooms, text="This room is already booked on this date",
-                                       fg="red")
+            if is_already_taken_for_update(drop_down_variable_room_number_editor.get(), book_start_editor.get(),book_end_editor.get(), record_id):
+                error_book_end = Label(error_edition_massage_for_rooms, text="This room is already booked on this date", fg="red")
                 error_book_end.grid(row=3, column=0, padx=10, pady=(0, 10))
+            if (book_start_editor.get() >= book_end_editor.get()):
+                error_book_end = Label(error_edition_massage_for_rooms, text="End of stay is closer than start of it",
+                                       fg="red")
+                error_book_end.grid(row=4, column=0, padx=10, pady=(0, 10))
         else:
             if (int(our_prevoius_room) == int(drop_down_variable_room_number_editor.get())):
                 cursor.execute("""UPDATE room""" + str(drop_down_variable_room_number_editor.get()) + """ SET
@@ -545,9 +546,9 @@ def edit():
                                    'oid_for_update': record_id,
                                })
             else:
-                cursor.execute("SELECT oid FROM room" + str(drop_down_variable_room_number_editor.get()))
+                cursor.execute("SELECT oid, book_start FROM room" + str(drop_down_variable_room_number_editor.get()))
                 our_lenght = cursor.fetchall()
-                if (len(our_lenght) == 1):
+                if (len(our_lenght) == 1 and our_lenght[0][1]):
                     cursor.execute("""UPDATE room""" + str(drop_down_variable_room_number_editor.get()) + """ SET
                                  status = :status_update,
                                  book_start = :book_start_update,
@@ -575,20 +576,36 @@ def edit():
                                        'client_id': record_id
                                    })
 
-                cursor.execute("DELETE FROM room" + str(our_prevoius_room) + " WHERE client_id= " + record_id)
                 cursor.execute("SELECT oid FROM room" + str(our_prevoius_room))
                 lenght_after_delete_from_previous_room = cursor.fetchall()
-                if(len(lenght_after_delete_from_previous_room)==0):
-                    cursor.execute("INSERT INTO room" + str(
-                        our_prevoius_room) + " VALUES (:r_number, :status, :book_start, :book_end, :payment_status, :client_id)",
+                if (len(lenght_after_delete_from_previous_room) == 1):
+                    cursor.execute("""UPDATE room""" + str(our_prevoius_room) + """ SET
+                                 status = :status_update,
+                                 book_start = :book_start_update,
+                                 book_end = :book_end_update,
+                                 payment_status = :payment_status_update,
+                                 client_id = :client_id_update
+
+                                 WHERE oid = 1""",
                                    {
-                                       'r_number': int(our_prevoius_room),
-                                       'status': "Clear",
-                                       'book_start': "None",
-                                       'book_end': "None",
-                                       'payment_status': "Not paid",
-                                       'client_id': "None"
+                                       'status_update': "Clear",
+                                       'book_start_update': "None",
+                                       'book_end_update': "None",
+                                       'payment_status_update': "Not paid",
+                                       'client_id_update': "None"
                                    })
+                    # cursor.execute("INSERT INTO room" + str(
+                    #     our_prevoius_room) + " VALUES (:r_number, :status, :book_start, :book_end, :payment_status, :client_id)",
+                    #                {
+                    #                    'r_number': int(our_prevoius_room),
+                    #                    'status': "Clear",
+                    #                    'book_start': "None",
+                    #                    'book_end': "None",
+                    #                    'payment_status': "Not paid",
+                    #                    'client_id': "None"
+                    #                })
+                else:
+                    cursor.execute("DELETE FROM room" + str(our_prevoius_room) + " WHERE client_id= " + record_id)
 
         # commit changes
         conn.commit()
@@ -734,7 +751,7 @@ def edit():
         r_number_label_editor.grid(row=7, column=0, padx=10)
 
         # create room section text
-        room_section_editor = Label(editor, text="Editor for room number: " + str(what_room_do_we_edit[0][0]))
+        room_section_editor = Label(editor, text="Editor for assigned room")
         room_section_editor.grid(row=8, column=0, columnspan=2, pady=10, padx=10)
 
         # create text box labels for rooms

@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="cb277c8d-d673-4e90-a74b-ba99e2a44a6b" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/database.py" beforeDir="false" afterPath="$PROJECT_DIR$/database.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/hotel.db" beforeDir="false" afterPath="$PROJECT_DIR$/hotel.db" afterDir="false" />
     </list>
@@ -17,8 +16,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/database.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="366">
-              <caret line="507" column="51" selection-start-line="507" selection-start-column="51" selection-end-line="507" selection-end-column="51" />
+            <state relative-caret-position="424">
+              <caret line="493" column="66" lean-forward="true" selection-start-line="493" selection-start-column="66" selection-end-line="493" selection-end-column="66" />
               <folding>
                 <element signature="e#0#21#0" expanded="true" />
               </folding>
@@ -54,16 +53,17 @@
       <find>delete clie</find>
       <find>options</find>
       <find>for</find>
-      <find>rooms</find>
       <find>room</find>
       <find>todo</find>
       <find>delete</find>
       <find>what_room_do_we_edit</find>
       <find>drop_down_variable_room_number_editor</find>
       <find>UPDATE</find>
-      <find>is_already_taken</find>
       <find>is_not_right_date</find>
       <find>error_edition_massage_for_rooms</find>
+      <find>rooms</find>
+      <find>query_room</find>
+      <find>is_already_taken</find>
     </findStrings>
     <replaceStrings>
       <replace>room_table_view</replace>
@@ -237,8 +237,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/database.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="366">
-          <caret line="507" column="51" selection-start-line="507" selection-start-column="51" selection-end-line="507" selection-end-column="51" />
+        <state relative-caret-position="424">
+          <caret line="493" column="66" lean-forward="true" selection-start-line="493" selection-start-column="66" selection-end-line="493" selection-end-column="66" />
           <folding>
             <element signature="e#0#21#0" expanded="true" />
           </folding>

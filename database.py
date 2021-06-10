@@ -79,11 +79,10 @@ def is_not_right_date(input):
     return False
 
 
-
-def is_already_taken(room_number, starting_date, ending_date):
+def is_already_taken_for_update(room_number, starting_date, ending_date, client):
     conn = sqlite3.connect('hotel.db')
     cursor = conn.cursor()
-    cursor.execute("SELECT book_start, book_end FROM room" + str(room_number))
+    cursor.execute("SELECT book_start, book_end, client_id FROM room" + str(room_number))
     status_checking = cursor.fetchall()
 
     # commit changes
@@ -91,13 +90,36 @@ def is_already_taken(room_number, starting_date, ending_date):
 
     # close connection
     conn.close()
-    i=0
+    i = 0
     # for i in range(len(status_checking)):
-    while(i<len(status_checking)):
+    while (i < len(status_checking)):
+        if ((starting_date >= status_checking[i][0] and starting_date < status_checking[i][1]) or (
+                ending_date > status_checking[i][0] and ending_date <= status_checking[i][1])):
+            if(client==status_checking[i][2]):
+                continue
+            else:
+                return True
+        i = i + 1
+    return False
+
+def is_already_taken(room_number, starting_date, ending_date):
+    conn = sqlite3.connect('hotel.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT book_start, book_end, client_id FROM room" + str(room_number))
+    status_checking = cursor.fetchall()
+
+    # commit changes
+    conn.commit()
+
+    # close connection
+    conn.close()
+    i = 0
+    # for i in range(len(status_checking)):
+    while (i < len(status_checking)):
         if ((starting_date >= status_checking[i][0] and starting_date < status_checking[i][1]) or (
                 ending_date > status_checking[i][0] and ending_date <= status_checking[i][1])):
             return True
-        i=i+1
+        i = i + 1
     return False
 
 
@@ -113,7 +135,8 @@ def submit():
     if (is_not_right_zipcode(zipcode.get()) or is_not_right_name_city_state(
             f_name.get()) or is_not_right_name_city_state(l_name.get()) or is_not_right_name_city_state(
         city.get()) or is_not_right_name_city_state(state.get()) or is_not_right_date(
-        book_start.get()) or is_not_right_date(book_end.get()) or is_already_taken(drop_down_variable_room_number.get(), book_start.get(), book_end.get())):
+        book_start.get()) or is_not_right_date(book_end.get()) or is_already_taken(drop_down_variable_room_number.get(),
+                                                                                   book_start.get(), book_end.get())):
         error_massage = Tk()
         error_massage.title("Error")
         error_list = Label(error_massage, text="Invalid input or database error:", fg="red")
@@ -289,7 +312,7 @@ def query_clients():
     conn.close()
 
 
-def query_rooms():
+def query_rooms():  # TODO scroll dla pokoi i klientów ewentualnie
     room_table_view = Tk()
     room_table_view.title("Room Informations")
     # editor.geometry("448x600")
@@ -383,6 +406,7 @@ def delete():
 
 
 # create edit function to change values of recordsś
+# JEŚLI SIĘ ZMIENIŁ POKÓJ TO DAJEMY DELETE TEN RZAD W TABELI I INSERT DO NOWEJ UWZGLĘDNIAJĄC SPRAWDZENIE CZY NIE BĘDZIE TO PRZYPADKIEM PIERWSZY WPIS I PRZEKOPIOWANIE WARTOŚCI Z POKOJU POPRZEDNIEGO
 def edit():
     # create edition save function for clients
     def save_edition():
@@ -445,8 +469,6 @@ def edit():
         # close connection
         conn.close()
 
-    # create edition save function for rooms
-    def save_edition_for_rooms():
         # create database or connect to one
         conn = sqlite3.connect('hotel.db')
 
@@ -455,7 +477,8 @@ def edit():
 
         record_id = client_or_room_id_for_edit.get()
 
-        if (is_not_right_date(book_start_editor.get()) or is_not_right_date(book_end_editor.get())):
+        if (is_not_right_date(book_start_editor.get()) or is_not_right_date(book_end_editor.get()) or is_already_taken_for_update(
+                drop_down_variable_room_number_editor.get(), book_start_editor.get(), book_end_editor.get(), record_id)):
             error_edition_massage_for_rooms = Tk()
             error_edition_massage_for_rooms.title("Error")
             error_list = Label(error_edition_massage_for_rooms, text="Invalid edition input in:", fg="red")
@@ -467,14 +490,19 @@ def edit():
             if is_not_right_date(book_end_editor.get()):
                 error_book_end = Label(error_edition_massage_for_rooms, text="Book end", fg="red")
                 error_book_end.grid(row=2, column=0, padx=10, pady=(0, 10))
+            if is_already_taken_for_update(drop_down_variable_room_number_editor.get(), book_start_editor.get(),
+                                book_end_editor.get(), record_id):
+                error_book_end = Label(error_edition_massage_for_rooms, text="This room is already booked on this date",
+                                       fg="red")
+                error_book_end.grid(row=3, column=0, padx=10, pady=(0, 10))
         else:
-            cursor.execute("""UPDATE rooms SET
+            cursor.execute("""UPDATE room"""+str(drop_down_variable_room_number_editor.get())+""" SET
                          status = :status_update,
                          book_start = :book_start_update,
                          book_end = :book_end_update,
                          payment_status = :payment_status_update
     
-                         WHERE oid = :oid_for_update""",
+                         WHERE client_id = :oid_for_update""",
                            {
                                'status_update': drop_down_variable_status_editor.get(),
                                'book_start_update': book_start_editor.get(),
@@ -489,6 +517,31 @@ def edit():
         # close connection
         conn.close()
 
+    def client_not_exist(input):
+        # create database or connect to one
+        conn = sqlite3.connect('hotel.db')
+
+        # create cursors
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT oid FROM clients")
+        our_clients = cursor.fetchall()
+        for i in range(len(our_clients)):
+            if (str(our_clients[i][0]) == str(input)):
+                # commit changes
+                conn.commit()
+
+                # close connection
+                conn.close()
+                return False
+
+        # commit changes
+        conn.commit()
+
+        # close connection
+        conn.close()
+        return True
+
     # create database or connect to one
     conn = sqlite3.connect('hotel.db')
 
@@ -500,14 +553,6 @@ def edit():
 
     cursor.execute("SELECT room_number FROM clients WHERE oid= " + record_id)
     what_room_do_we_edit = cursor.fetchall()
-
-    def client_not_exist(input):
-        cursor.execute("SELECT oid FROM clients")
-        our_clients=cursor.fetchall()
-        for i in range(len(our_clients)):
-            if(str(our_clients[i][0])==str(input)):
-                return False
-        return True
 
     if (client_not_exist(record_id)):
         error_edition_massage_for_edition_attempt = Tk()
@@ -593,19 +638,20 @@ def edit():
         # create text boxes for rooms
         status_editor = OptionMenu(editor, drop_down_variable_status_editor, *OPTIONS_FOR_STATUS_EDITOR)
         status_editor.config(width=24)
-        status_editor.grid(row=10, column=1, padx=20)
+        status_editor.grid(row=9, column=1, padx=20)
 
-        book_start_editor = DateEntry(editor, date_pattern="dd/mm/yyyy", width=27, background='grey', foreground='white',
+        book_start_editor = DateEntry(editor, date_pattern="dd/mm/yyyy", width=27, background='grey',
+                                      foreground='white',
                                       borderwidth=2)
-        book_start_editor.grid(row=11, column=1, padx=20)
+        book_start_editor.grid(row=10, column=1, padx=20)
 
         book_end_editor = DateEntry(editor, date_pattern="dd/mm/yyyy", width=27, background='grey', foreground='white',
                                     borderwidth=2)
-        book_end_editor.grid(row=12, column=1, padx=20)
+        book_end_editor.grid(row=11, column=1, padx=20)
 
         payment_status_editor = OptionMenu(editor, drop_down_variable_payment_editor, *OPTIONS_FOR_PAYMENT_EDITOR)
         payment_status_editor.config(width=24)
-        payment_status_editor.grid(row=13, column=1, padx=20)
+        payment_status_editor.grid(row=12, column=1, padx=20)
 
         # create client section text
         room_section_editor = Label(editor, text="Editor for client with ID: " + str(record_id))
@@ -635,29 +681,29 @@ def edit():
 
         # create room section text
         room_section_editor = Label(editor, text="Editor for room number: " + str(what_room_do_we_edit[0][0]))
-        room_section_editor.grid(row=9, column=0, columnspan=2, pady=10, padx=10)
+        room_section_editor.grid(row=8, column=0, columnspan=2, pady=10, padx=10)
 
         # create text box labels for rooms
 
         status_label_editor = Label(editor, text="Status")
-        status_label_editor.grid(row=10, column=0, padx=10)
+        status_label_editor.grid(row=9, column=0, padx=10)
 
         book_start_label_editor = Label(editor, text="Book start date")
-        book_start_label_editor.grid(row=11, column=0, padx=10)
+        book_start_label_editor.grid(row=10, column=0, padx=10)
 
         book_end_label_editor = Label(editor, text="Book end date")
-        book_end_label_editor.grid(row=12, column=0, padx=10)
+        book_end_label_editor.grid(row=11, column=0, padx=10)
 
         payment_status_label_editor = Label(editor, text="Payment Status")
-        payment_status_label_editor.grid(row=13, column=0, padx=10)
+        payment_status_label_editor.grid(row=12, column=0, padx=10)
 
-        # create submit button fro clients
-        submit_button_editor = Button(editor, text="Save client changes", command=save_edition)
-        submit_button_editor.grid(row=8, column=0, columnspan=2, pady=10, padx=10, ipadx=70)
+        # # create submit button fro clients
+        # submit_button_editor = Button(editor, text="Save client changes", command=save_edition)
+        # submit_button_editor.grid(row=8, column=0, columnspan=2, pady=10, padx=10, ipadx=70)
 
         # create submit button for rooms
-        submit_button_editor = Button(editor, text="Save room changes", command=save_edition_for_rooms)
-        submit_button_editor.grid(row=14, column=0, columnspan=2, pady=10, padx=10, ipadx=70)
+        submit_button_editor = Button(editor, text="Save changes", command=save_edition)
+        submit_button_editor.grid(row=13, column=0, columnspan=2, pady=10, padx=10, ipadx=70)
 
         # Query the database
         cursor.execute("SELECT * FROM clients WHERE oid = " + record_id)
@@ -672,7 +718,8 @@ def edit():
             zipcode_editor.insert(0, i[5]),
 
         # query the database for room information
-        cursor_for_rooms.execute("SELECT * FROM room" + str(what_room_do_we_edit[0][0]) + " WHERE client_id = " + record_id)
+        cursor_for_rooms.execute(
+            "SELECT * FROM room" + str(what_room_do_we_edit[0][0]) + " WHERE client_id = " + record_id)
         our_data_for_rooms = cursor_for_rooms.fetchall()
 
         book_start_editor.delete(0, END)

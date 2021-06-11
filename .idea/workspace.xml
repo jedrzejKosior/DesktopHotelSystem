@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="cb277c8d-d673-4e90-a74b-ba99e2a44a6b" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/database.py" beforeDir="false" afterPath="$PROJECT_DIR$/database.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/hotel.db" beforeDir="false" afterPath="$PROJECT_DIR$/hotel.db" afterDir="false" />
     </list>
@@ -16,8 +17,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/database.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2074">
-              <caret line="527" column="58" selection-start-line="527" selection-start-column="58" selection-end-line="527" selection-end-column="58" />
+            <state relative-caret-position="436">
+              <caret line="120" column="87" selection-start-line="120" selection-start-column="87" selection-end-line="120" selection-end-column="87" />
               <folding>
                 <element signature="e#0#21#0" expanded="true" />
               </folding>
@@ -36,10 +37,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>client_or_room_id_for_edit</find>
-      <find>cursor_for_rooms</find>
-      <find>delete_button</find>
-      <find>END</find>
       <find>submit</find>
       <find>editor</find>
       <find>room_table_view</find>
@@ -66,6 +63,10 @@
       <find>print</find>
       <find>error_edition_massage_for_rooms</find>
       <find>[2]</find>
+      <find>edition</find>
+      <find>editor for room</find>
+      <find>DELETE</find>
+      <find>client_not_exist</find>
     </findStrings>
     <replaceStrings>
       <replace>room_table_view</replace>
@@ -85,10 +86,10 @@
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="2018" />
+    <option name="x" value="2231" />
     <option name="y" value="-9" />
-    <option name="width" value="1549" />
-    <option name="height" value="838" />
+    <option name="width" value="1152" />
+    <option name="height" value="624" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
@@ -201,13 +202,14 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="1912" y="-8" width="1936" height="1056" extended-state="6" />
+    <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.08271865" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.27735645" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.2708559" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.39869988" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -238,8 +240,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/database.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2074">
-          <caret line="527" column="58" selection-start-line="527" selection-start-column="58" selection-end-line="527" selection-end-column="58" />
+        <state relative-caret-position="436">
+          <caret line="120" column="87" selection-start-line="120" selection-start-column="87" selection-end-line="120" selection-end-column="87" />
           <folding>
             <element signature="e#0#21#0" expanded="true" />
           </folding>

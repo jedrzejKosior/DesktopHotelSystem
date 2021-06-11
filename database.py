@@ -7,6 +7,7 @@ root = Tk()
 root.title("Hotel Management System")
 # root.geometry("448x600")
 
+
 # create database or open
 
 conn = sqlite3.connect('hotel.db')
@@ -93,7 +94,7 @@ def is_already_taken_for_update(room_number, starting_date, ending_date, client)
     # for i in range(len(status_checking)):
     while (i < len(status_checking)):
         if ((starting_date >= status_checking[i][0] and starting_date < status_checking[i][1]) or (
-                ending_date > status_checking[i][0] and ending_date <= status_checking[i][1])):
+                ending_date > status_checking[i][0] and ending_date <= status_checking[i][1]) or (starting_date <= status_checking[i][0] and ending_date >= status_checking[i][1])):
             if (int(client) == int(status_checking[i][2])):
                 i = i + 1
                 continue
@@ -118,7 +119,7 @@ def is_already_taken(room_number, starting_date, ending_date):
     # for i in range(len(status_checking)):
     while (i < len(status_checking)):
         if ((starting_date >= status_checking[i][0] and starting_date < status_checking[i][1]) or (
-                ending_date > status_checking[i][0] and ending_date <= status_checking[i][1])):
+                ending_date > status_checking[i][0] and ending_date <= status_checking[i][1]) or (starting_date <= status_checking[i][0] and ending_date >= status_checking[i][1])):
             return True
         i = i + 1
     return False
@@ -367,44 +368,75 @@ def query_rooms():  # TODO scroll dla pokoi i klientów ewentualnie
 
 # create delete function
 def delete():
-    # create database or connect to one
-    conn = sqlite3.connect('hotel.db')
+    def client_not_exist(input):
+        # create database or connect to one
+        conn = sqlite3.connect('hotel.db')
 
-    # create cursor
-    cursor = conn.cursor()
+        # create cursors
+        cursor = conn.cursor()
 
-    cursor.execute("SELECT room_number FROM clients WHERE oid= " + client_id_for_delete.get())
-    our_room_to_delete = cursor.fetchall()
-    # delete a record
-    cursor.execute("DELETE FROM clients WHERE oid= " + client_id_for_delete.get())
-    cursor.execute(
-        "DELETE FROM room" + str(our_room_to_delete[0][0]) + " WHERE client_id= " + client_id_for_delete.get())
+        cursor.execute("SELECT oid FROM clients")
+        our_clients = cursor.fetchall()
+        for i in range(len(our_clients)):
+            if (str(our_clients[i][0]) == str(input)):
+                # commit changes
+                conn.commit()
 
-    conn.commit()
+                # close connection
+                conn.close()
+                return False
 
-    # close connection
-    conn.close()
+        # commit changes
+        conn.commit()
 
-    # create database or connect to one
-    conn = sqlite3.connect('hotel.db')
+        # close connection
+        conn.close()
+        return True
 
-    # create cursor
-    cursor = conn.cursor()
+    if (client_not_exist(client_id_for_delete.get())):
+        error_edition_massage_for_edition_attempt = Tk()
+        error_edition_massage_for_edition_attempt.title("Error")
+        error_list = Label(error_edition_massage_for_edition_attempt, text="There is no such client!", fg="red")
+        error_list.grid(row=0, column=0, padx=10, pady=10)
+    else:
+        # create database or connect to one
+        conn = sqlite3.connect('hotel.db')
 
-    cursor.execute("SELECT * FROM room" + str(our_room_to_delete[0][0]))
-    our_lenght = cursor.fetchall()
+        # create cursor
+        cursor = conn.cursor()
 
-    if (len(our_lenght) == 0):
+        cursor.execute("SELECT room_number FROM clients WHERE oid= " + client_id_for_delete.get())
+        our_room_to_delete = cursor.fetchall()
+        # delete a record
+        cursor.execute("DELETE FROM clients WHERE oid= " + client_id_for_delete.get())
         cursor.execute(
-            "INSERT INTO room" + str(our_room_to_delete[0][0]) + " VALUES (" + str(
-                our_room_to_delete[0][0]) + ", 'Clear', 'None', 'None', 'Not paid', 'None')")
+            "DELETE FROM room" + str(our_room_to_delete[0][0]) + " WHERE client_id= " + client_id_for_delete.get())
 
-    client_id_for_delete.delete(0, END)
-    # commit changes
-    conn.commit()
+        conn.commit()
 
-    # close connection
-    conn.close()
+        # close connection
+        conn.close()
+
+        # create database or connect to one
+        conn = sqlite3.connect('hotel.db')
+
+        # create cursor
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT * FROM room" + str(our_room_to_delete[0][0]))
+        our_lenght = cursor.fetchall()
+
+        if (len(our_lenght) == 0):
+            cursor.execute(
+                "INSERT INTO room" + str(our_room_to_delete[0][0]) + " VALUES (" + str(
+                    our_room_to_delete[0][0]) + ", 'Clear', 'None', 'None', 'Not paid', 'None')")
+
+        client_id_for_delete.delete(0, END)
+        # commit changes
+        conn.commit()
+
+        # close connection
+        conn.close()
 
 
 # create edit function to change values of recordsś
@@ -594,16 +626,6 @@ def edit():
                                        'payment_status_update': "Not paid",
                                        'client_id_update': "None"
                                    })
-                    # cursor.execute("INSERT INTO room" + str(
-                    #     our_prevoius_room) + " VALUES (:r_number, :status, :book_start, :book_end, :payment_status, :client_id)",
-                    #                {
-                    #                    'r_number': int(our_prevoius_room),
-                    #                    'status': "Clear",
-                    #                    'book_start': "None",
-                    #                    'book_end': "None",
-                    #                    'payment_status': "Not paid",
-                    #                    'client_id': "None"
-                    #                })
                 else:
                     cursor.execute("DELETE FROM room" + str(our_prevoius_room) + " WHERE client_id= " + record_id)
 

@@ -315,7 +315,7 @@ def query_clients():
     conn.close()
 
 
-def query_rooms():  # TODO scroll dla pokoi i klientów ewentualnie
+def query_rooms():
     room_table_view = Tk()
     room_table_view.title("Room Informations")
     # editor.geometry("448x600")
@@ -644,8 +644,8 @@ def edit():
 
     record_id = client_or_room_id_for_edit.get()
 
-    cursor.execute("SELECT room_number FROM clients WHERE oid= " + record_id)
-    what_room_do_we_edit = cursor.fetchall()
+    # cursor.execute("SELECT room_number FROM clients WHERE oid= " + record_id)
+    # what_room_do_we_edit = cursor.fetchall()
 
     if (client_not_exist(record_id)):
         error_edition_massage_for_edition_attempt = Tk()
@@ -655,6 +655,8 @@ def edit():
     else:
         editor = Tk()
         editor.title("Records Editor")
+        cursor.execute("SELECT room_number FROM clients WHERE oid= " + record_id)
+        what_room_do_we_edit = cursor.fetchall()
         # editor.geometry("448x600")
 
         # create global variables for our text boxes in editor to access them later in update methods
